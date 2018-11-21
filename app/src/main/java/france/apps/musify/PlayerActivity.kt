@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager
+import android.support.v7.widget.AppCompatSeekBar
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +17,7 @@ import france.apps.musify.utils.models.PlayableMedia
 
 class PlayerActivity : AppCompatActivity() {
 
-    internal var sbMediaSeekbar: SeekBar? = null
+    internal var sbMediaSeekbar: AppCompatSeekBar? = null
     internal var tvCurrentTime: TextView? = null
     internal var tvArtist: TextView? = null
     internal var tvTitle: TextView? = null

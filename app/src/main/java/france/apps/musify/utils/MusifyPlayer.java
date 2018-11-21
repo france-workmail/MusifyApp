@@ -1,16 +1,28 @@
 package france.apps.musify.utils;
 
+import android.content.ComponentName;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
-import android.support.annotation.Nullable;
+import android.os.SystemClock;
+import android.support.annotation.NonNull;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.webkit.URLUtil;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import france.apps.musify.MusifyApplication;
+import france.apps.musify.utils.cache.new_cache.MediaCacheCallback;
+import france.apps.musify.utils.cache.new_cache.MediaCacheWorkerTask;
+import france.apps.musify.utils.cache.old.AudioStreamWorkerTask;
+import france.apps.musify.utils.cache.old.OnCacheCallback;
 import france.apps.musify.utils.models.PlayableMedia;
 
 public class MusifyPlayer {
@@ -115,6 +127,13 @@ public class MusifyPlayer {
 
         }
     };
+
+
+    /**
+     * Headset/Blutooth speaker buttons
+     */
+    private static AudioManager mAudioManager;
+    private static ComponentName mRemoteControlResponder;
 
 
     //setters and getters
@@ -276,8 +295,9 @@ public class MusifyPlayer {
 
     }
 
-    public static void setCurrentlyPlayedMusic(@Nullable PlayableMedia item) {
+    public static void setCurrentlyPlayedMusic(@NonNull PlayableMedia item) {
         currentlyPlayedMusic = item;
+        play();
     }
 
     public static void seekToTrackPercentage(int trackDurationPercentage){
@@ -296,31 +316,214 @@ public class MusifyPlayer {
 
     private static void playAudio(String url) {
 
-        try {
+
+
+        //setup headset hardware
+        initMediaRemote();
+
 
             //setup player
 
 
-
-            if(player!=null){
+            if (player != null) {
                 player.release();
                 player = null;
             }
             player = new MediaPlayer();
-            if(!URLUtil.isValidUrl(url))
+            if (!URLUtil.isValidUrl(url))
                 playNext();
 
+            //TODO Add media caching.
+            // Reference: https://stackoverflow.com/questions/12701249/getting-access-to-media-player-cache
+
+            if (Constants.OFFLINE_MODE) {
+//                new AudioStreamWorkerTask(MusifyApplication.getAppContext(), new OnCacheCallback() {
+//                    @Override
+//                    public void onSuccess(FileInputStream stream) {
+//
+//                        try {
+//                            player.setDataSource(stream.getFD());
+//                            player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//                            player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+//                                @Override
+//                                public void onPrepared(MediaPlayer mp) {
+//                                    isCurrentTrackPrepared = true;
+//                                    for (OnPlayerChangesListener listener : listeners)
+//                                        listener.OnNewTrackStarted(getCurrentlyPlayedMusic());
+//
+//
+//                                    handler.postDelayed(r, 1000);
+//
+//                                    player.start();
+//                                }
+//                            });
+//
+//
+//                            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//                                @Override
+//                                public void onCompletion(MediaPlayer mp) {
+//                                    for (OnPlayerChangesListener listener : listeners)
+//                                        listener.OnCurrentTrackEnded(getCurrentlyPlayedMusic());
+//
+//                                    handler.removeCallbacks(r);
+//                                    playNext();
+//                                }
+//                            });
+//
+//                            player.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+//                                @Override
+//                                public void onSeekComplete(MediaPlayer mp) {
+//                                    Log.e("Player", "Seeked to: " + mp.getCurrentPosition());
+//                                    player.start();
+//                                }
+//                            });
+//                            stream.close();
+//                            handler.removeCallbacks(r);
+//
+//
+//                            //assign ui
+//                            isCurrentTrackPrepared = false;
+//                            player.prepareAsync();
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        } catch (IllegalStateException ex) {
+//                            ex.printStackTrace();
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onError() {
+//
+//                    }
+//                }).execute(url);
+
+                new MediaCacheWorkerTask(MusifyApplication.getAppContext(), new MediaCacheCallback() {
+                    @Override
+                    public void onSnapshotFound(FileInputStream stream) {
+                        streamSnapshot(stream);
+//                        try {
+//                            player.setDataSource(stream.getFD());
+//                            player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//                            player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+//                                @Override
+//                                public void onPrepared(MediaPlayer mp) {
+//                                    isCurrentTrackPrepared = true;
+//                                    for (OnPlayerChangesListener listener : listeners)
+//                                        listener.OnNewTrackStarted(getCurrentlyPlayedMusic());
+//
+//
+//                                    handler.postDelayed(r, 1000);
+//
+//                                    player.start();
+//                                }
+//                            });
+//
+//
+//                            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//                                @Override
+//                                public void onCompletion(MediaPlayer mp) {
+//                                    for (OnPlayerChangesListener listener : listeners)
+//                                        listener.OnCurrentTrackEnded(getCurrentlyPlayedMusic());
+//
+//                                    handler.removeCallbacks(r);
+//                                    playNext();
+//                                }
+//                            });
+//
+//                            player.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+//                                @Override
+//                                public void onSeekComplete(MediaPlayer mp) {
+//                                    Log.e("Player", "Seeked to: " + mp.getCurrentPosition());
+//                                    player.start();
+//                                }
+//                            });
+//                            stream.close();
+//                            handler.removeCallbacks(r);
+//
+//
+//                            //assign ui
+//                            isCurrentTrackPrepared = false;
+//                            player.prepareAsync();
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+                    }
+
+                    @Override
+                    public void onSnapshotMissing(String url) {
+                        streamThroughNet(url);
+                    }
+                }).execute(url);
+            }
+            //stream using internet
+            else {
+                streamThroughNet(url);
+
+//                try{
+//                //Without Caching Callback
+//                player.setDataSource(url);
+//                player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//                player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+//                    @Override
+//                    public void onPrepared(MediaPlayer mp) {
+//                        isCurrentTrackPrepared = true;
+//                        for (OnPlayerChangesListener listener : listeners)
+//                            listener.OnNewTrackStarted(getCurrentlyPlayedMusic());
+//
+//
+//                        handler.postDelayed(r, 1000);
+//
+//                        player.start();
+//                    }
+//                });
+//
+//
+//                player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//                    @Override
+//                    public void onCompletion(MediaPlayer mp) {
+//                        for (OnPlayerChangesListener listener : listeners)
+//                            listener.OnCurrentTrackEnded(getCurrentlyPlayedMusic());
+//
+//                        handler.removeCallbacks(r);
+//                        playNext();
+//                    }
+//                });
+//
+//                player.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+//                    @Override
+//                    public void onSeekComplete(MediaPlayer mp) {
+//                        Log.e("Player", "Seeked to: " + mp.getCurrentPosition());
+//                        player.start();
+//                    }
+//                });
+//                handler.removeCallbacks(r);
+//
+//
+//                //assign ui
+//                isCurrentTrackPrepared = false;
+//                player.prepareAsync();
+//            } catch(IOException e){
+//                e.printStackTrace();
+//            } catch(IllegalStateException ex){
+//                ex.printStackTrace();
+//            }
+        }
+    }
+
+    private static void streamThroughNet(String url){
+        try{
+            //Without Caching Callback
             player.setDataSource(url);
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
             player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     isCurrentTrackPrepared = true;
-                    for(OnPlayerChangesListener listener: listeners)
+                    for (OnPlayerChangesListener listener : listeners)
                         listener.OnNewTrackStarted(getCurrentlyPlayedMusic());
 
 
-                    handler.postDelayed(r,1000);
+                    handler.postDelayed(r, 1000);
 
                     player.start();
                 }
@@ -330,7 +533,7 @@ public class MusifyPlayer {
             player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    for(OnPlayerChangesListener listener: listeners)
+                    for (OnPlayerChangesListener listener : listeners)
                         listener.OnCurrentTrackEnded(getCurrentlyPlayedMusic());
 
                     handler.removeCallbacks(r);
@@ -341,7 +544,7 @@ public class MusifyPlayer {
             player.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
                 @Override
                 public void onSeekComplete(MediaPlayer mp) {
-                    Log.e("Player", "Seeked to: "+mp.getCurrentPosition());
+                    Log.e("Player", "Seeked to: " + mp.getCurrentPosition());
                     player.start();
                 }
             });
@@ -351,13 +554,61 @@ public class MusifyPlayer {
             //assign ui
             isCurrentTrackPrepared = false;
             player.prepareAsync();
-        } catch (IOException e) {
+        } catch(IOException e){
             e.printStackTrace();
-        } catch (IllegalStateException ex) {
+        } catch(IllegalStateException ex){
             ex.printStackTrace();
         }
     }
 
+    private static void streamSnapshot(FileInputStream stream){
+        try {
+            player.setDataSource(stream.getFD());
+            player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    isCurrentTrackPrepared = true;
+                    for (OnPlayerChangesListener listener : listeners)
+                        listener.OnNewTrackStarted(getCurrentlyPlayedMusic());
+
+
+                    handler.postDelayed(r, 1000);
+
+                    player.start();
+                }
+            });
+
+
+            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    for (OnPlayerChangesListener listener : listeners)
+                        listener.OnCurrentTrackEnded(getCurrentlyPlayedMusic());
+
+                    handler.removeCallbacks(r);
+                    playNext();
+                }
+            });
+
+            player.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+                @Override
+                public void onSeekComplete(MediaPlayer mp) {
+                    Log.e("Player", "Seeked to: " + mp.getCurrentPosition());
+                    player.start();
+                }
+            });
+            stream.close();
+            handler.removeCallbacks(r);
+
+
+            //assign ui
+            isCurrentTrackPrepared = false;
+            player.prepareAsync();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static String getTimeString(long millis) {
         String finalTimerString = "";
@@ -417,5 +668,112 @@ public class MusifyPlayer {
 
     public static ArrayList<PlayableMedia> getMusicPlaylist(){
         return musicPlaylist;
+    }
+
+
+    /**
+     *
+     *
+     * METHODS TO MONITOR REMOTE DEVICE
+     *
+     */
+
+    static MediaSessionCompat mediaSessionCompat;
+    private static void initMediaRemote(){
+
+//        if(mAudioManager==null || mRemoteControlResponder == null) {
+//            mAudioManager = (AudioManager) MusifyApplication.getAppContext().getSystemService(Context.AUDIO_SERVICE);
+//            mRemoteControlResponder = new ComponentName(MusifyApplication.getAppContext(),
+//                    HeadsetButtonReceiver.class.getName());
+//
+////        Log.e(TAG,"REGISTERED MEDIA REMOTE");
+//            mAudioManager.registerMediaButtonEventReceiver(mRemoteControlResponder);
+////        Constants.currentPlayer = MussharePlayer.this;
+//
+//
+//
+//        }
+
+
+//        MediaSessionCompat mediaSessionCompat = new MediaSessionCompat(MusifyApplication.getAppContext(),"MediaSessionTag");
+//        mediaSessionCompat.setCallback(new MediaSessionCompat.Callback() {
+//            @Override
+//            public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
+//
+//
+//                KeyEvent event = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+//                int keyCode = event.getKeyCode();
+//
+//                switch (keyCode){
+////                        case KeyEvent.KEYCODE_VOLUME_UP:
+//                    case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+//                        playOrPause();
+//                        return true;
+//                    case  KeyEvent.KEYCODE_MEDIA_NEXT:
+//                        playNext();
+//                        return true;
+//                    case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+//                        playPrevious();
+//                        return true;
+//
+//                }
+//
+//
+//                return super.onMediaButtonEvent(mediaButtonEvent);
+//            }
+//        });
+//        mediaSessionCompat.setActive(true);
+
+
+
+        if(mediaSessionCompat==null) {
+            ComponentName mediaReceiver = new ComponentName(MusifyApplication.getAppContext(), HeadsetButtonReceiver.class);
+            mediaSessionCompat = new MediaSessionCompat(MusifyApplication.getAppContext(), "MediaButtons", mediaReceiver, null);
+            mediaSessionCompat.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+            mediaSessionCompat.setCallback(new MediaSessionCompat.Callback() {
+                @Override
+                public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
+
+                    KeyEvent event = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                    int keyCode = event.getKeyCode();
+
+                    if (event.getAction() == KeyEvent.ACTION_UP)
+                        switch (keyCode) {
+                            case KeyEvent.KEYCODE_HEADSETHOOK:
+                            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                                playOrPause();
+                                return true;
+                            case KeyEvent.KEYCODE_MEDIA_NEXT:
+                                playNext();
+                                return true;
+                            case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                                playPrevious();
+                                return true;
+
+                        }
+
+                    return super.onMediaButtonEvent(mediaButtonEvent);
+                }
+
+
+            });
+
+            mediaSessionCompat.setActive(true);
+
+            PlaybackStateCompat playbackStateCompat = new PlaybackStateCompat.Builder()
+                    .setActions(
+                            PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                                    PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID | PlaybackStateCompat.ACTION_PAUSE |
+                                    PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+
+                    )
+                    .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1, SystemClock.elapsedRealtime())
+                    .build();
+            mediaSessionCompat.setPlaybackState(playbackStateCompat);
+
+
+        }
+
+
     }
 }

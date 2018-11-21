@@ -1,5 +1,6 @@
 package france.apps.musify.utils.models
 
+import france.apps.musify.utils.Constants
 import france.apps.musify.utils.models.MediaMetadata
 
 class PlayableMedia(var id: String?, var url: String?, var title: String?) {
@@ -8,8 +9,13 @@ class PlayableMedia(var id: String?, var url: String?, var title: String?) {
 
     init {
 
-        if (url != null)
-            metadata = MediaMetadata(url)
+//        if (url != null && !Constants.OFFLINE_MODE) {
+//            try {
+//                metadata = MediaMetadata(url)
+//            }catch (e: RuntimeException){
+//                e.printStackTrace()
+//            }
+//        }
 
     }
 
