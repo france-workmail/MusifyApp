@@ -5,44 +5,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black"
-    tools:context=".PlayerActivity">
+    tools:context=".PlayerActivity"
+    tools:layout_editor_absoluteY="25dp">
 
     <ImageButton
         android:id="@+id/ibPrevious"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
         android:background="@android:color/transparent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/ibPlayPause"
         app:layout_constraintEnd_toStartOf="@+id/ibPlayPause"
-        app:layout_constraintTop_toBottomOf="@+id/sbMediaSeekbar"
+        app:layout_constraintTop_toTopOf="@+id/ibPlayPause"
         app:srcCompat="@android:drawable/ic_media_previous" />
 
     <ImageButton
         android:id="@+id/imageButton8"
         android:layout_width="15dp"
         android:layout_height="15dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
         android:background="@android:color/transparent"
         android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/ibPrevious"
         app:layout_constraintEnd_toStartOf="@+id/ibPrevious"
-        app:layout_constraintTop_toBottomOf="@+id/sbMediaSeekbar"
+        app:layout_constraintTop_toTopOf="@+id/ibPrevious"
         app:srcCompat="@mipmap/ic_shuffle" />
 
     <TextView
         android:id="@+id/tvDuration"
         android:layout_width="41dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:text="0:00"
         android:textAlignment="center"
         android:textColor="@android:color/white"
@@ -52,12 +46,9 @@
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/constraintLayout"
-        android:layout_width="0dp"
+        android:layout_width="592dp"
         android:layout_height="50dp"
-        android:background="#999999"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:background="#999999">
 
         <ImageView
             android:id="@+id/ivDropPage"
@@ -124,21 +115,30 @@
 
     <android.support.v4.view.ViewPager
         android:id="@+id/vpPlaylist"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="280dp"
+        android:layout_height="239dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_default="percent"
         app:layout_constraintHeight_percent="0.5"
+        app:layout_constraintHorizontal_bias="0.03"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/constraintLayout3"
         android:layout_width="0dp"
-        android:layout_height="48dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/vpPlaylist">
+        app:layout_constraintStart_toEndOf="@+id/vpPlaylist"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        app:layout_constraintVertical_bias="0.24000001">
 
         <ImageButton
             android:id="@+id/imageButton"
@@ -208,27 +208,27 @@
         android:layout_width="41dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="8dp"
         android:text="0:39"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textSize="10sp"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/vpPlaylist"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout3" />
 
     <android.support.v7.widget.AppCompatSeekBar
         android:id="@+id/sbMediaSeekbar"
         android:layout_width="0dp"
         android:layout_height="6dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="8dp"
         android:max="100"
         android:progress="20"
         android:progressDrawable="@drawable/seekbar_style"
         android:thumb="@drawable/custom_thumb"
         app:layout_constraintEnd_toStartOf="@+id/tvDuration"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/tvCurrentTime"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout3" />
 
@@ -237,16 +237,12 @@
         android:layout_width="57dp"
         android:layout_height="57dp"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
         android:background="@android:color/transparent"
         android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/vpPlaylist"
         app:layout_constraintTop_toBottomOf="@+id/sbMediaSeekbar"
         app:srcCompat="@mipmap/ic_play_arrow" />
 
@@ -255,13 +251,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
         android:background="@android:color/transparent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/ibPlayPause"
         app:layout_constraintStart_toEndOf="@+id/ibPlayPause"
-        app:layout_constraintTop_toBottomOf="@+id/sbMediaSeekbar"
+        app:layout_constraintTop_toTopOf="@+id/ibPlayPause"
         app:srcCompat="@android:drawable/ic_media_next" />
 
     <ImageButton
@@ -269,13 +262,10 @@
         android:layout_width="15dp"
         android:layout_height="15dp"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
         android:background="@android:color/transparent"
         android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/ibNext"
         app:layout_constraintStart_toEndOf="@+id/ibNext"
-        app:layout_constraintTop_toBottomOf="@+id/sbMediaSeekbar"
+        app:layout_constraintTop_toTopOf="@+id/ibNext"
         app:srcCompat="@mipmap/ic_repeat" />
 </android.support.constraint.ConstraintLayout>

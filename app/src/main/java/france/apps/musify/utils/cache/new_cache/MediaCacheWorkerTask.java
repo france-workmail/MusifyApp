@@ -18,7 +18,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import france.apps.musify.MusifyApplication;
-import france.apps.musify.utils.cache.old.OnCacheCallback;
 
 public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStream> {
 
@@ -63,7 +62,7 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
 
                 currentEditor = cache.edit(key);
 //                urlToDownload = data;
-
+//                snapshot.getInputStream(DISK_CACHE_INDEX);
                 return null;
             } else
                 Log.e(getTag(), "Snapshot found sending");

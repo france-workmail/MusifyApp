@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "323725804369",
+    "firebase_url": "https://musifyappproject.firebaseio.com",
+    "project_id": "musifyappproject",
+    "storage_bucket": "musifyappproject.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:323725804369:android:2b0a1d1bf41f3d7c",
+        "android_client_info": {
+          "package_name": "france.apps.musify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "323725804369-sm9bhcrsevcdg9ajvs239ujkmcm0ahti.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJDdXopPmpYBQotYY2QZroVh1lAQ1dkYw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -107,7 +107,7 @@ public class MusifyPlayer {
         public void run() {
 
             PlayableMedia item = getCurrentlyPlayedMusic();
-            if(item!=null&& player.isPlaying()){
+            if(item!=null&&player.isPlaying()){
 
 //                int currentProgressPercentage = (int) (((double) PlayerUtil.player.getCurrentPosition() / PlayerUtil.player.getDuration()) * 100);
 
@@ -199,7 +199,12 @@ public class MusifyPlayer {
     }
 
     public static boolean isPlaying(){
-        return player!=null && player.isPlaying();
+        try {
+            return player!=null && player.isPlaying();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public static void shufflePlaylist(boolean shouldShuffle)
@@ -607,6 +612,8 @@ public class MusifyPlayer {
             player.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
+        }catch(IllegalStateException ex){
+            ex.printStackTrace();
         }
     }
 
@@ -661,7 +668,7 @@ public class MusifyPlayer {
     public static void destroy(){
         if(MusifyPlayer.isPlaying()){
             MusifyPlayer.player.stop();
-            MusifyPlayer.player.release();
+            MusifyPlayer.player.reset();
         }
     }
 

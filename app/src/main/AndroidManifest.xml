@@ -7,9 +7,9 @@
     <application
         android:name=".MusifyApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_headphones"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_headphones"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         >
@@ -23,7 +23,9 @@
 
         <activity
             android:name=".MainActivity"
-            android:theme="@style/FullScreen">
+            android:theme="@style/FullScreen"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />

@@ -130,6 +130,13 @@ class PlayerActivity : AppCompatActivity() {
         ibPrevious = findViewById(R.id.ibPrevious)
         viewPager = findViewById(R.id.vpPlaylist)
 
+        var ivDropPage:ImageView = findViewById(R.id.ivDropPage)
+        ivDropPage.setOnClickListener(object:View.OnClickListener{
+            override fun onClick(v: View?) {
+                finish()
+            }
+        })
+
 
         ibPlayPause?.setOnClickListener{ v->
 

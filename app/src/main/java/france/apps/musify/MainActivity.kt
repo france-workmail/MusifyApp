@@ -1,6 +1,7 @@
 package france.apps.musify
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.media.MediaPlayer
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -15,6 +16,8 @@ import android.view.View
 import android.widget.*
 import france.apps.musify.menufragments.HomeFragment
 import android.util.Log
+import france.apps.musify.menufragments.BrowseFragment
+import france.apps.musify.utils.Constants
 import france.apps.musify.utils.MusifyPlayer
 import france.apps.musify.utils.models.PlayableMedia
 
@@ -46,6 +49,57 @@ class MainActivity : AppCompatActivity() {
 //        }
 //    }
 
+    internal var playerListener:MusifyPlayer.OnPlayerChangesListener  = object:MusifyPlayer.OnPlayerChangesListener{
+        override fun OnListenerAttached(item: PlayableMedia?) {
+
+            var title = item?.metadata?.title
+            var artist = item?.metadata?.artist
+            title = title ?: item?.title //elvis expression
+            artist = artist ?: "No artist"
+
+            tvTrackInfo?.text = title.plus(" - ").plus(artist)
+
+            ibPlayPause?.setImageResource(if(MusifyPlayer.isPlaying()) R.mipmap.ic_pause else R.mipmap.ic_play_arrow)
+        }
+
+        override fun OnPause(item: PlayableMedia?) {
+            ibPlayPause?.setImageResource(R.mipmap.ic_play_arrow)
+        }
+
+        override fun OnPlay(item: PlayableMedia?) {
+            ibPlayPause?.setImageResource(R.mipmap.ic_pause)
+        }
+
+        override fun OnNewTrackOpened(item: PlayableMedia?) {
+
+
+
+            var title = item?.metadata?.title
+            var artist = item?.metadata?.artist
+            title = title ?: item?.title //elvis expression
+            artist = artist ?: "No artist"
+
+            tvTrackInfo?.text = title.plus(" - ").plus(artist)
+
+            Log.e("tag","New Track opened")
+
+        }
+
+        override fun OnNewTrackStarted(item: PlayableMedia?) {
+
+            ibPlayPause?.setImageResource(R.mipmap.ic_pause)
+        }
+
+        override fun OnCurrentTrackEnded(item: PlayableMedia?) {
+            ibPlayPause?.setImageResource(R.mipmap.ic_play_arrow)
+        }
+
+        override fun OnCurrentTrackTimeUpdated(item: PlayableMedia?, currentTime: Float, progressPercentage:Int) {
+            progressBar?.progress =progressPercentage
+
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -61,9 +115,6 @@ class MainActivity : AppCompatActivity() {
         setupTabIcons()
 
 
-
-        //
-
         ibPlayPause = findViewById(R.id.ibTrackPlayPause)
         ibPlayPause?.setOnClickListener{ v->
 
@@ -74,7 +125,7 @@ class MainActivity : AppCompatActivity() {
         }
         clTrackIndicator = findViewById(R.id.clTrackIndicator)
         clTrackIndicator?.setOnClickListener { v: View? ->
-            Toast.makeText(this,"Open Player", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this,"Open Player", Toast.LENGTH_SHORT).show()
 
 //            startActivity(Intent(this,PlayerActivity.class))
             this.startActivity(Intent(this,PlayerActivity::class.java))
@@ -85,79 +136,28 @@ class MainActivity : AppCompatActivity() {
 
 
 
-//http://www.noiseaddicts.com/samples_1w72b820/2544.mp3     ||| https://videokeman.com/dload/0ydl/17/04/Bruno_Mars_-_That_s_What_I_Like_Lyrics_Lyric_Video.vkm
+
+
+
+        //http://www.noiseaddicts.com/samples_1w72b820/2544.mp3     |||  https://videokeman.com/dload/0ydl/17/04/Bruno_Mars_-_That_s_What_I_Like_Lyrics_Lyric_Video.vkm
         var item = PlayableMedia(null, "https://www.sadecemp3indir.mobi/uploads/mp3/dd233c99a6a4dc221b190129ecea5465.mp3", "That's what I like")
-        var item2 = PlayableMedia(null, "https://6.cdn.mp3xa.pw/proxy/cs9-13v4.vkuseraudio.net/p1/c8f635fc69e8a8.mp3", "The Lazy Song")
+        var item2 = PlayableMedia(null, "https://www.sadecemp3indir.mobi/uploads/mp3/a979d8f7190157d8b42c1a8f4edc4270.mp3", "Versace On the Floor")
         var item3 = PlayableMedia(null,"https://www.sadecemp3indir.mobi/uploads/mp3/c210e49b396c1c309baa9a2e4e22942d.mp3", "Love Yourself")
         var item4 = PlayableMedia(null,"https://www.sadecemp3indir.mobi/uploads/mp3/c957f382f6919a071162dbd095b9aaee.mp3", "24K Magic")
 
 
 
         item.setCoverImageUrl("http://www.aaminc.com/images/made/89edeb5e9990e69a/Thats_What_I_like_400_400_90_c1.jpg")
-        item2.setCoverImageUrl( "https://streamd.hitparade.ch/cdimages/bruno_mars-the_lazy_song_s.jpg")
+        item2.setCoverImageUrl( "http://skypip.com/wp-content/uploads/2017/04/images.jpg")
         item3.setCoverImageUrl("http://s2.glbimg.com/UNUU2P5SxHa_LP4kJcpgkr97MPI=/s.glbimg.com/jo/g1/f/original/2015/10/13/justin-bieber-purpose.jpg")
         item4.setCoverImageUrl("https://ih0.redbubble.net/image.424180221.6012/flat,550x550,075,f.u1.jpg")
 
 
-        MusifyPlayer.addListener(object : MusifyPlayer.OnPlayerChangesListener{
-            override fun OnListenerAttached(item: PlayableMedia?) {
 
-                var title = item?.metadata?.title
-                var artist = item?.metadata?.artist
-                title = title ?: item?.title //elvis expression
-                artist = artist ?: "No artist"
-
-                tvTrackInfo?.text = title.plus(" - ").plus(artist)
-
-                ibPlayPause?.setImageResource(if(MusifyPlayer.isPlaying()) R.mipmap.ic_pause else R.mipmap.ic_play_arrow)
-            }
-
-            override fun OnPause(item: PlayableMedia?) {
-                ibPlayPause?.setImageResource(R.mipmap.ic_play_arrow)
-            }
-
-            override fun OnPlay(item: PlayableMedia?) {
-                ibPlayPause?.setImageResource(R.mipmap.ic_pause)
-            }
-
-            override fun OnNewTrackOpened(item: PlayableMedia?) {
+        MusifyPlayer.addListener(playerListener)
 
 
-//                var title = item?.metadata?.title
-//                var artist = item?.metadata?.artist
-//                title = title ?: "No Title" //elvis expression
-//                artist = artist ?: "No artist"
-
-                var title = item?.metadata?.title
-                var artist = item?.metadata?.artist
-                title = title ?: item?.title //elvis expression
-                artist = artist ?: "No artist"
-//                tvArtist?.text = artist
-//                tvTitle?.text = title
-
-                tvTrackInfo?.text = title.plus(" - ").plus(artist)
-
-                Log.e("tag","New Track opened")
-
-            }
-
-            override fun OnNewTrackStarted(item: PlayableMedia?) {
-
-                ibPlayPause?.setImageResource(R.mipmap.ic_pause)
-            }
-
-            override fun OnCurrentTrackEnded(item: PlayableMedia?) {
-                ibPlayPause?.setImageResource(R.mipmap.ic_play_arrow)
-            }
-
-            override fun OnCurrentTrackTimeUpdated(item: PlayableMedia?, currentTime: Float, progressPercentage:Int) {
-                progressBar?.progress =progressPercentage
-
-            }
-        } )
-
-
-       var list =  ArrayList<PlayableMedia>()
+        var list =  ArrayList<PlayableMedia>()
         list.add(item)
         list.add(item2)
         list.add(item3)
@@ -166,8 +166,14 @@ class MainActivity : AppCompatActivity() {
         MusifyPlayer.playPlaylist(list)
 
 
-
     }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(Constants.SAVE_ACTIVITY_STATE, true)
+    }
+
+
 
     internal fun setupTabIcons(){
         tabBottomTabs?.getTabAt(0)?.setIcon(R.mipmap.ic_home)
@@ -190,13 +196,13 @@ class MainActivity : AppCompatActivity() {
             if (position == 0) {
                 fragment = HomeFragment()
             } else if (position == 1) {
-                fragment = Fragment()
+                fragment = BrowseFragment()
             } else if (position == 2) {
-                fragment = Fragment()
+                fragment = BrowseFragment()
             }else if (position == 3) {
-                fragment = Fragment()
+                fragment = BrowseFragment()
             }else if (position == 4) {
-                fragment = Fragment()
+                fragment = BrowseFragment()
             }
             return fragment
         }
