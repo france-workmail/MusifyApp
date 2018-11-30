@@ -6,6 +6,8 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.Toast
 
 import france.apps.musify.R
 
@@ -26,8 +28,14 @@ class HomeFragment : Fragment() {
 
      override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+         
+         
+         view.findViewById<ImageButton>(R.id.ibInfo).setOnClickListener {
+             v ->
+             Toast.makeText(activity,"Created by: France Gelasque. App Icon credits to: smalllikeart of www.flaticon.com",Toast.LENGTH_SHORT).show()
+         }
 
-    }
+     }
 
 
 }
