@@ -168,10 +168,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(Constants.SAVE_ACTIVITY_STATE, true)
-    }
+
 
 
 
