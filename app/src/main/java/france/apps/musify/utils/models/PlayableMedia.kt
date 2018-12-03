@@ -1,17 +1,14 @@
 package france.apps.musify.utils.models
 
-import france.apps.musify.utils.Constants
-import france.apps.musify.utils.models.MediaMetadata
-
-class PlayableMedia(var id: String?, var url: String?, var title: String?) {
+class PlayableMedia(var id: String="", var audio_url: String="", var title: String = "", var artist: String = "") {
 
     public var metadata: MediaMetadata? = null
 
     init {
 
-//        if (url != null && !Constants.OFFLINE_MODE) {
+//        if (audio_url != null && !Constants.OFFLINE_MODE) {
 //            try {
-//                metadata = MediaMetadata(url)
+//                metadata = MediaMetadata(audio_url)
 //            }catch (e: RuntimeException){
 //                e.printStackTrace()
 //            }
@@ -19,15 +16,12 @@ class PlayableMedia(var id: String?, var url: String?, var title: String?) {
 
     }
 
-     public var coverImageUrl:String? = null
 
 
-    fun setCoverImageUrl( url:String):PlayableMedia{
-        coverImageUrl = url
+     public var audio_image:String? = null
+    fun setAudioImageUrl(url:String):PlayableMedia{
+        audio_image = url
         return this
     }
-//    fun getCoverImageUrl():String{
-//        return coverImageUrl
-//    }
 
 }

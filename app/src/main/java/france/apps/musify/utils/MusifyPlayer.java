@@ -21,8 +21,6 @@ import java.util.Collections;
 import france.apps.musify.MusifyApplication;
 import france.apps.musify.utils.cache.new_cache.MediaCacheCallback;
 import france.apps.musify.utils.cache.new_cache.MediaCacheWorkerTask;
-import france.apps.musify.utils.cache.old.AudioStreamWorkerTask;
-import france.apps.musify.utils.cache.old.OnCacheCallback;
 import france.apps.musify.utils.models.PlayableMedia;
 
 public class MusifyPlayer {
@@ -167,6 +165,11 @@ public class MusifyPlayer {
         playlistIndex = 0;
         play();
     }
+    public static void playPlaylist(ArrayList<PlayableMedia> playlist, int index){
+        musicPlaylist = playlist;
+        playlistIndex = index;
+        play();
+    }
 
     private static void play(){
 
@@ -186,7 +189,7 @@ public class MusifyPlayer {
 
 
 
-        playAudio(currentlyPlayedMusic.getUrl());
+        playAudio(currentlyPlayedMusic.getAudio_url());
 
 
 
@@ -400,7 +403,7 @@ public class MusifyPlayer {
 //                    public void onError() {
 //
 //                    }
-//                }).execute(url);
+//                }).execute(audio_url);
 
                 new MediaCacheWorkerTask(MusifyApplication.getAppContext(), new MediaCacheCallback() {
                     @Override
@@ -466,7 +469,7 @@ public class MusifyPlayer {
 
 //                try{
 //                //Without Caching Callback
-//                player.setDataSource(url);
+//                player.setDataSource(audio_url);
 //                player.setAudioStreamType(AudioManager.STREAM_MUSIC);
 //                player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
 //                    @Override

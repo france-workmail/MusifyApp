@@ -31,8 +31,8 @@ class PlayerActivity : AppCompatActivity() {
 
     internal var playerListener: MusifyPlayer.OnPlayerChangesListener =  object:MusifyPlayer.OnPlayerChangesListener{
         override fun OnListenerAttached(item: PlayableMedia?) {
-            var title = item?.metadata?.title
-            var artist = item?.metadata?.artist
+            var title = item?.title
+            var artist = item?.artist
             title = title ?: item?.title //elvis expression
             artist = artist ?: "No artist"
             tvArtist?.text = artist
@@ -59,8 +59,8 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         override fun OnNewTrackOpened(item: PlayableMedia?) {
-            var title = item?.metadata?.title
-            var artist = item?.metadata?.artist
+            var title = item?.title
+            var artist = item?.artist
             title = title ?: item?.title //elvis expression
             artist = artist ?: "No artist"
             tvArtist?.text = artist
@@ -234,9 +234,9 @@ class PlayerActivity : AppCompatActivity() {
             imageView.layoutParams  = ViewGroup.LayoutParams(viewPager!!.width,viewPager!!.height)
 
 
-            if(list[position].coverImageUrl != null){
+            if(list[position].audio_image != null){
                 Glide.with(mContext)
-                        .load(list[position].coverImageUrl)
+                        .load(list[position].audio_image)
                         .into(imageView)
 
             }else imageView.setImageResource(android.R.drawable.ic_menu_report_image)

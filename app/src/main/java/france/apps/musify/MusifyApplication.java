@@ -3,6 +3,7 @@ package france.apps.musify;
 import android.app.Application;
 import android.content.Context;
 
+import com.google.firebase.database.FirebaseDatabase;
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import java.io.IOException;
@@ -26,6 +27,8 @@ public class MusifyApplication extends Application {
                 e.printStackTrace();
             }
         }
+
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
     }
 
     public static DiskLruCache getDiskCache(Context context){

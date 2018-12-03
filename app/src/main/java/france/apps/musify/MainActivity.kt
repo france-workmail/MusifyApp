@@ -1,7 +1,6 @@
 package france.apps.musify
 
 import android.content.Intent
-import android.content.res.Configuration
 import android.media.MediaPlayer
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -16,8 +15,8 @@ import android.view.View
 import android.widget.*
 import france.apps.musify.menufragments.HomeFragment
 import android.util.Log
+import com.google.firebase.database.*
 import france.apps.musify.menufragments.BrowseFragment
-import france.apps.musify.utils.Constants
 import france.apps.musify.utils.MusifyPlayer
 import france.apps.musify.utils.models.PlayableMedia
 
@@ -52,14 +51,17 @@ class MainActivity : AppCompatActivity() {
     internal var playerListener:MusifyPlayer.OnPlayerChangesListener  = object:MusifyPlayer.OnPlayerChangesListener{
         override fun OnListenerAttached(item: PlayableMedia?) {
 
-            var title = item?.metadata?.title
-            var artist = item?.metadata?.artist
+            var title = item?.title
+            var artist = item?.artist
             title = title ?: item?.title //elvis expression
             artist = artist ?: "No artist"
 
             tvTrackInfo?.text = title.plus(" - ").plus(artist)
 
             ibPlayPause?.setImageResource(if(MusifyPlayer.isPlaying()) R.mipmap.ic_pause else R.mipmap.ic_play_arrow)
+
+
+            clTrackIndicator?.visibility = if(MusifyPlayer.isPlaying()) View.VISIBLE else View.GONE
         }
 
         override fun OnPause(item: PlayableMedia?) {
@@ -74,14 +76,16 @@ class MainActivity : AppCompatActivity() {
 
 
 
-            var title = item?.metadata?.title
-            var artist = item?.metadata?.artist
+            var title = item?.title
+            var artist = item?.artist
             title = title ?: item?.title //elvis expression
             artist = artist ?: "No artist"
 
             tvTrackInfo?.text = title.plus(" - ").plus(artist)
 
             Log.e("tag","New Track opened")
+
+            clTrackIndicator?.visibility = View.VISIBLE
 
         }
 
@@ -140,30 +144,54 @@ class MainActivity : AppCompatActivity() {
 
 
         //http://www.noiseaddicts.com/samples_1w72b820/2544.mp3     |||  https://videokeman.com/dload/0ydl/17/04/Bruno_Mars_-_That_s_What_I_Like_Lyrics_Lyric_Video.vkm
-        var item = PlayableMedia(null, "https://www.sadecemp3indir.mobi/uploads/mp3/dd233c99a6a4dc221b190129ecea5465.mp3", "That's what I like")
-        var item2 = PlayableMedia(null, "https://www.sadecemp3indir.mobi/uploads/mp3/a979d8f7190157d8b42c1a8f4edc4270.mp3", "Versace On the Floor")
-        var item3 = PlayableMedia(null,"https://www.sadecemp3indir.mobi/uploads/mp3/c210e49b396c1c309baa9a2e4e22942d.mp3", "Love Yourself")
-        var item4 = PlayableMedia(null,"https://www.sadecemp3indir.mobi/uploads/mp3/c957f382f6919a071162dbd095b9aaee.mp3", "24K Magic")
-
-
-
-        item.setCoverImageUrl("http://www.aaminc.com/images/made/89edeb5e9990e69a/Thats_What_I_like_400_400_90_c1.jpg")
-        item2.setCoverImageUrl( "http://skypip.com/wp-content/uploads/2017/04/images.jpg")
-        item3.setCoverImageUrl("http://s2.glbimg.com/UNUU2P5SxHa_LP4kJcpgkr97MPI=/s.glbimg.com/jo/g1/f/original/2015/10/13/justin-bieber-purpose.jpg")
-        item4.setCoverImageUrl("https://ih0.redbubble.net/image.424180221.6012/flat,550x550,075,f.u1.jpg")
-
-
-
+//        var item = PlayableMedia(null, "https://www.sadecemp3indir.mobi/uploads/mp3/dd233c99a6a4dc221b190129ecea5465.mp3", "That's what I like")
+//        var item2 = PlayableMedia(null, "https://www.sadecemp3indir.mobi/uploads/mp3/a979d8f7190157d8b42c1a8f4edc4270.mp3", "Versace On the Floor")
+//        var item3 = PlayableMedia(null,"https://www.sadecemp3indir.mobi/uploads/mp3/c210e49b396c1c309baa9a2e4e22942d.mp3", "Love Yourself")
+//        var item4 = PlayableMedia(null,"https://www.sadecemp3indir.mobi/uploads/mp3/c957f382f6919a071162dbd095b9aaee.mp3", "24K Magic")
+//
+//
+//
+//        item.setAudioImageUrl("http://www.aaminc.com/images/made/89edeb5e9990e69a/Thats_What_I_like_400_400_90_c1.jpg")
+//        item2.setAudioImageUrl( "http://skypip.com/wp-content/uploads/2017/04/images.jpg")
+//        item3.setAudioImageUrl("http://s2.glbimg.com/UNUU2P5SxHa_LP4kJcpgkr97MPI=/s.glbimg.com/jo/g1/f/original/2015/10/13/justin-bieber-purpose.jpg")
+//        item4.setAudioImageUrl("https://ih0.redbubble.net/image.424180221.6012/flat,550x550,075,f.u1.jpg")
+//
+//
+//
         MusifyPlayer.addListener(playerListener)
+//
+//
+//        var list =  ArrayList<PlayableMedia>()
+//        list.add(item)
+//        list.add(item2)
+//        list.add(item3)
+//        list.add(item4)
+//
+//        MusifyPlayer.playPlaylist(list)
 
 
-        var list =  ArrayList<PlayableMedia>()
-        list.add(item)
-        list.add(item2)
-        list.add(item3)
-        list.add(item4)
+//      var database:DatabaseReference = FirebaseDatabase.getInstance().reference
+//        database.child("songs").addListenerForSingleValueEvent(object:ValueEventListener{
+//            override fun onCancelled(p0: DatabaseError) {
+//                Log.e("fbError",p0.message)
+//            }
+//
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//
+//                var mediaList: ArrayList<PlayableMedia>? = ArrayList()
+//                if(snapshot.exists()){
+//
+//                    for(d in snapshot.children){
+//                        val media = d.getValue(PlayableMedia::class.java)
+//                        mediaList?.add(media!!)
+//                    }
+//                    MusifyPlayer.playPlaylist(mediaList)
+//
+//                }
+//
+//            }
+//        })
 
-        MusifyPlayer.playPlaylist(list)
 
 
     }
