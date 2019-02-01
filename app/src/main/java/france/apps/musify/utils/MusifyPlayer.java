@@ -461,6 +461,9 @@ public class MusifyPlayer {
                     public void onSnapshotMissing(String url) {
                         streamThroughNet(url);
                     }
+
+                    @Override
+                    public void onSnapshotDownloaded(boolean downloaded) {}
                 }).execute(url);
             }
             //stream using internet

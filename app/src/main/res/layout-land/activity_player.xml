@@ -8,6 +8,23 @@
     tools:context=".PlayerActivity"
     tools:layout_editor_absoluteY="25dp">
 
+    <RadioButton
+        android:id="@+id/rbDownloaded"
+        android:layout_width="118dp"
+        android:layout_height="23dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:buttonTint="@android:color/white"
+        android:buttonTintMode="src_in"
+        android:checked="true"
+        android:text="Downloaded"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/vpPlaylist"
+        app:layout_constraintStart_toStartOf="@+id/vpPlaylist"
+        app:layout_constraintTop_toTopOf="@+id/vpPlaylist"
+        app:layout_constraintVertical_bias="1.0" />
+
     <ImageButton
         android:id="@+id/ibPrevious"
         android:layout_width="wrap_content"
@@ -158,7 +175,7 @@
             app:srcCompat="@android:drawable/ic_menu_add" />
 
         <ImageButton
-            android:id="@+id/imageButton4"
+            android:id="@+id/ibTrackOptions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -187,7 +204,7 @@
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/imageButton4"
+            app:layout_constraintEnd_toStartOf="@+id/ibTrackOptions"
             app:layout_constraintStart_toEndOf="@+id/imageButton"
             app:layout_constraintTop_toTopOf="parent" />
 

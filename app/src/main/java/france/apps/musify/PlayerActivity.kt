@@ -27,7 +27,7 @@ class PlayerActivity : AppCompatActivity() {
     internal var ibNext: ImageButton? = null
     internal var ibPrevious: ImageButton? = null
     internal var viewPager: ViewPager? = null
-
+    internal var rbDownloaded: RadioButton? = null
 
     internal var playerListener: MusifyPlayer.OnPlayerChangesListener =  object:MusifyPlayer.OnPlayerChangesListener{
         override fun OnListenerAttached(item: PlayableMedia?) {
@@ -69,6 +69,8 @@ class PlayerActivity : AppCompatActivity() {
             viewPager?.removeOnPageChangeListener(pagerListener)
             viewPager?.currentItem =  MusifyPlayer.playlistIndex
             viewPager?.addOnPageChangeListener(pagerListener)
+
+            rbDownloaded?.isChecked = MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy
         }
 
         override fun OnNewTrackStarted(item: PlayableMedia?) {
@@ -109,6 +111,8 @@ class PlayerActivity : AppCompatActivity() {
             else if(p0>MusifyPlayer.playlistIndex){
                 MusifyPlayer.playNext()
             }
+
+            rbDownloaded?.isChecked = MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy
         }
 
     }
@@ -129,6 +133,16 @@ class PlayerActivity : AppCompatActivity() {
         ibNext = findViewById(R.id.ibNext)
         ibPrevious = findViewById(R.id.ibPrevious)
         viewPager = findViewById(R.id.vpPlaylist)
+        rbDownloaded = findViewById(R.id.rbDownloaded)
+
+        findViewById<ImageButton>(R.id.ibTrackOptions).setOnClickListener {
+            MusifyPlayer.getCurrentlyPlayedMusic().downloadOffline(object:PlayableMedia.MediaDownloadCallbacks{
+                override fun didDownload(downloaded: Boolean) {
+                    viewPager?.adapter?.notifyDataSetChanged()
+                    rbDownloaded?.isChecked = MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy
+                }
+            })
+        }
 
         var ivDropPage:ImageView = findViewById(R.id.ivDropPage)
         ivDropPage.setOnClickListener(object:View.OnClickListener{

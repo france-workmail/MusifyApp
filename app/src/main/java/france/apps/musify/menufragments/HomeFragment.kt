@@ -134,7 +134,11 @@ class HomeFragment : Fragment() {
 
                      newReleases.clear()
                      for(d in snapshot.children){
-                         val media = d.getValue(PlayableMedia::class.java)
+//                         val media = d.getValue(PlayableMedia::class.java)
+
+                         var mediaHash = d.value as HashMap<*,*>
+                         var media = PlayableMedia(mediaHash["id"].toString(), mediaHash["audio_url"].toString(), mediaHash["audio_image"].toString(),mediaHash["title"].toString(),mediaHash["artist"].toString())
+
                          newReleases.add(media!!)
                      }
 
@@ -157,7 +161,11 @@ class HomeFragment : Fragment() {
 
                      trending.clear()
                      for(d in snapshot.children){
-                         val media = d.getValue(PlayableMedia::class.java)
+//                         val media = d.getValue(PlayableMedia::class.java)
+
+                         var mediaHash = d.value as HashMap<*,*>
+                         var media = PlayableMedia(mediaHash["id"].toString(), mediaHash["audio_url"].toString(), mediaHash["audio_image"].toString(),mediaHash["title"].toString(),mediaHash["artist"].toString())
+
                          trending.add(media!!)
                      }
 

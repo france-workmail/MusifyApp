@@ -27,10 +27,15 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
 
     private static DiskLruCache.Editor currentEditor = null;
     private static String urlToDownload = null;
+    private boolean downloadWhenNotInCache = false;
 
     public MediaCacheWorkerTask(Context context, MediaCacheCallback callback) {
         this.context = context;
         this.callback = callback;
+    }
+    public MediaCacheWorkerTask(Context context, MediaCacheCallback callback, boolean downloadWhenNotInCache) {
+        this(context,callback);
+        this.downloadWhenNotInCache = downloadWhenNotInCache;
     }
 
     @Override
@@ -49,7 +54,7 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
         try {
             DiskLruCache.Snapshot snapshot = cache.get(key);
             if (snapshot == null) {
-                Log.e(getTag(), "Snapshot is not available downloading...");
+                Log.e(getTag(), "Snapshot is not available");
 //                DiskLruCache.Editor editor = cache.edit(key);
 //                if (editor != null) {
 //                    if (downloadUrlToStream(data, editor.newOutputStream(DISK_CACHE_INDEX)))
@@ -63,6 +68,8 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
                 currentEditor = cache.edit(key);
 //                urlToDownload = data;
 //                snapshot.getInputStream(DISK_CACHE_INDEX);
+
+
                 return null;
             } else
                 Log.e(getTag(), "Snapshot found sending");
@@ -85,8 +92,36 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
             else {
                 callback.onSnapshotMissing(urlToDownload);
 
-                if(currentEditor != null && urlToDownload!=null){
-                    new DownloadUrlToStreamTask().execute();
+//                if(currentEditor != null && urlToDownload!=null && downloadWhenNotInCache){
+//                    new DownloadUrlToStreamTask(callback).execute();
+//                }
+                if( urlToDownload!=null && downloadWhenNotInCache){
+
+                    try {
+                        if(currentEditor==null) {
+                            currentEditor = MusifyApplication.getDiskCache(context).edit(hashKeyForDisk(urlToDownload));
+                        }
+                        if(currentEditor == null){
+                            callback.onSnapshotDownloaded(false);
+                            return;
+                        }
+
+                        new DownloadUrlToStreamTask(callback).execute();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+                else{
+                    try {
+                        if (currentEditor != null) {
+                            currentEditor.abort();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }catch (IllegalStateException ex){
+                        ex.printStackTrace();
+                    }
                 }
             }
         }
@@ -94,30 +129,45 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
         context = null;
     }
 
-    static class DownloadUrlToStreamTask extends AsyncTask<Void,Void,Void>{
+    static class DownloadUrlToStreamTask extends AsyncTask<Void,Void,Boolean>{
 
 
+        MediaCacheCallback downloadCallback;
+
+        public DownloadUrlToStreamTask(MediaCacheCallback downloadCallback) {
+            this.downloadCallback = downloadCallback;
+        }
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected Boolean doInBackground(Void... voids) {
 
             final int DISK_CACHE_INDEX = 0;
             try {
-                if(downloadUrlToStream(urlToDownload,currentEditor.newOutputStream(DISK_CACHE_INDEX))) {
+                boolean downloaded = downloadUrlToStream(urlToDownload,currentEditor.newOutputStream(DISK_CACHE_INDEX));
+
+                if(downloaded) {
                     Log.e("Cache", "Cached media file: "+ urlToDownload);
                     currentEditor.commit();
                 }
                 else
                     currentEditor.abort();
 
+                return downloaded;
+
             } catch (IOException e) {
                 e.printStackTrace();
+//                downloadCallback.onSnapshotDownloaded(false);
+                return  false;
             }
 
 
-            return null;
         }
 
+        @Override
+        protected void onPostExecute(Boolean s) {
+            super.onPostExecute(s);
+            downloadCallback.onSnapshotDownloaded(s);
+        }
 
         public boolean downloadUrlToStream(String urlString, OutputStream outputStream) {
             HttpURLConnection urlConnection = null;
