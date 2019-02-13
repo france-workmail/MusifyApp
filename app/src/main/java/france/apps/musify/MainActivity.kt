@@ -48,6 +48,20 @@ class MainActivity : AppCompatActivity() {
 //        }
 //    }
 
+    companion object {
+
+        /* this is used to load the 'hello-jni' library on application
+         * startup. The library has already been unpacked into
+         * /data/data/com.example.kotlinjni/lib/libkotlin-jni.so at
+         * installation time by the package manager.
+         */
+        init {
+            System.loadLibrary("native-lib")
+        }
+    }
+    private external fun invokeNativeFunction(): String
+
+
     internal var playerListener:MusifyPlayer.OnPlayerChangesListener  = object:MusifyPlayer.OnPlayerChangesListener{
         override fun OnListenerAttached(item: PlayableMedia?) {
 
@@ -117,6 +131,7 @@ class MainActivity : AppCompatActivity() {
         tabBottomTabs?.setupWithViewPager(viewPager)
 
         setupTabIcons()
+//        Log.i("NativeFFF:", "key: " + invokeNativeFunction())
 
 
         ibPlayPause = findViewById(R.id.ibTrackPlayPause)

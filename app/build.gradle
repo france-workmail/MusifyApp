@@ -8,8 +8,8 @@ android {
         applicationId "france.apps.musify"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 3
-        versionName "Beta 1.0.1"
+        versionCode 5
+        versionName "Beta 1.0.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -20,6 +20,11 @@ android {
     }
     dataBinding {
         enabled = true
+    }
+    externalNativeBuild {
+        cmake {
+            path file('src/CMakeLists.txt')
+        }
     }
 
 }
