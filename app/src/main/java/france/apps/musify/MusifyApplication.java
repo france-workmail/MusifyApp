@@ -3,6 +3,8 @@ package france.apps.musify;
 import android.app.Application;
 import android.content.Context;
 
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.database.FirebaseDatabase;
 import com.jakewharton.disklrucache.DiskLruCache;
 
@@ -18,7 +20,9 @@ public class MusifyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
         appContext =  getApplicationContext();
+        FirebaseApp.initializeApp(appContext);
 
         if(Constants.OFFLINE_MODE) {
             try {
