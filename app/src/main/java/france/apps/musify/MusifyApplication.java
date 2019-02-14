@@ -12,6 +12,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.SecureRandom;
@@ -55,7 +56,7 @@ public class MusifyApplication extends Application {
 
 
 
-        if(isHacked(appContext,PACKAGE_NAME,GOOGLE_PLAY,AMAZON_STORE)){
+        if(isIllegallyDistributed(appContext,PACKAGE_NAME,GOOGLE_PLAY,AMAZON_STORE)){
 
             Toast.makeText(appContext, "App installation should be from official channels only", Toast.LENGTH_LONG).show();
             new CountDownTimer(5000, 1000) {
@@ -72,32 +73,37 @@ public class MusifyApplication extends Application {
     }
 
     public static String getEncryptedKey(){
-//        String nativeKey = invokeNativeFunction();
 
+        byte[] keyStart = invokeNativeFunction().getBytes();
+        KeyGenerator kgen = null;
 
+        SecureRandom sr = new SecureRandom();
         try {
-
-
-//            byte[] keyStart = nativeKey.getBytes();
-            byte[] keyStart = invokeNativeFunction().getBytes();
-            KeyGenerator kgen = null;
             kgen = KeyGenerator.getInstance("AES");
-
-//            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-            SecureRandom sr = new SecureRandom();
             sr.setSeed(keyStart);
-            kgen.init(128, sr); // 192 and 256 bits may not be available
-            SecretKey skey = kgen.generateKey();
-            byte[] key = skey.getEncoded();
+            kgen.init(256, sr); // 192 and 256 bits may not be available
 
-            // encrypt
-            byte[] encryptedData = encrypt(key,"".getBytes());
-
-            return new String(encryptedData);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
+            return null;
         }
-        catch (Exception ex){ex.printStackTrace();}
+        catch (InvalidParameterException invPar){
+            if(kgen == null)
+                return null;
+            //if 256 is not supported we'll use 128
+            kgen.init(128,sr);
+        }
+
+
+
+        SecretKey skey = kgen.generateKey();
+        byte[] key = skey.getEncoded();
+
+        // encrypt
+        try {
+            byte[] encryptedData = encrypt(key, "".getBytes());
+            return new String(encryptedData);
+        }catch (Exception e){e.printStackTrace();}
 
         return null;
     }
@@ -122,7 +128,7 @@ public class MusifyApplication extends Application {
     private static final String PACKAGE_NAME = "france.apps.musify";
     private static final String GOOGLE_PLAY = "com.android.vending";
     private static final String AMAZON_STORE = "com.android.vending";
-    public static boolean isHacked(Context context, String myPackageName, String google, String amazon)
+    public static boolean isIllegallyDistributed(Context context, String myPackageName, String google, String amazon)
     {
         //Renamed?
         if (context.getPackageName().compareTo(myPackageName) != 0) {
