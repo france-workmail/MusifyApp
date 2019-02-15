@@ -49,18 +49,20 @@ class PlayableMedia(@set:PropertyName("id")
 //    }
 
     fun downloadOffline(callback:MediaDownloadCallbacks){
-        MediaCacheWorkerTask(MusifyApplication.getAppContext(), object : MediaCacheCallback {
-            override fun onSnapshotFound(stream: FileInputStream) {}
+        if(!hasOfflineCopy) {
+            MediaCacheWorkerTask(MusifyApplication.getAppContext(), object : MediaCacheCallback {
+                override fun onSnapshotFound(stream: FileInputStream) {}
 
-            override fun onSnapshotMissing(url: String) {}
-            override fun onSnapshotDownloaded(downloaded: Boolean) {
-                hasOfflineCopy = downloaded
-                isDownloading = false
-                callback.didDownload(downloaded)
-            }
-        }, true).execute(audio_url)
+                override fun onSnapshotMissing(url: String) {}
+                override fun onSnapshotDownloaded(downloaded: Boolean) {
+                    hasOfflineCopy = downloaded
+                    isDownloading = false
+                    callback.didDownload(downloaded)
+                }
+            }, true).execute(audio_url)
 
-        isDownloading = true
+            isDownloading = true
+        }
     }
 
     public interface MediaDownloadCallbacks {

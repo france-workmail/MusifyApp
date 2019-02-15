@@ -38,6 +38,7 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
         this.downloadWhenNotInCache = downloadWhenNotInCache;
     }
 
+    private String fileKey = null;
     @Override
     protected FileInputStream doInBackground(String... params) {
         urlToDownload = params[0];
@@ -50,7 +51,7 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
         long currentMaxSize = cache.getMaxSize();
         float percentageSize = Math.round((cache.size() * 100.0f) / currentMaxSize);
         if (percentageSize >= 90) // cache size reaches 90%
-            cache.setMaxSize(currentMaxSize + (10 * 1024 * 1024)); // increase size to 10MB
+            cache.setMaxSize(currentMaxSize + (15 * 1024 * 1024)); // increase size to 15MB
         try {
             DiskLruCache.Snapshot snapshot = cache.get(key);
             if (snapshot == null) {
@@ -64,8 +65,9 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
 //                }
 //                snapshot = cache.get(key);
 
+                fileKey = key;
+//                currentEditor = cache.edit(key);
 
-                currentEditor = cache.edit(key);
 //                urlToDownload = data;
 //                snapshot.getInputStream(DISK_CACHE_INDEX);
 
@@ -99,7 +101,7 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
 
                     try {
                         if(currentEditor==null) {
-                            currentEditor = MusifyApplication.getDiskCache(context).edit(hashKeyForDisk(urlToDownload));
+                            currentEditor = MusifyApplication.getDiskCache(context).edit(fileKey);
                         }
                         if(currentEditor == null){
                             callback.onSnapshotDownloaded(false);
@@ -150,13 +152,14 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
                     currentEditor.commit();
                 }
                 else
-                    currentEditor.abort();
+                    currentEditor.abortUnlessCommitted();
 
                 return downloaded;
 
             } catch (IOException e) {
                 e.printStackTrace();
 //                downloadCallback.onSnapshotDownloaded(false);
+                currentEditor.abortUnlessCommitted();
                 return  false;
             }
 

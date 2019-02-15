@@ -27,7 +27,7 @@ class PlayerActivity : AppCompatActivity() {
     internal var ibNext: ImageButton? = null
     internal var ibPrevious: ImageButton? = null
     internal var viewPager: ViewPager? = null
-    internal var rbDownloaded: RadioButton? = null
+    internal var ibDownloaded: ImageButton? = null
 
     internal var playerListener: MusifyPlayer.OnPlayerChangesListener =  object:MusifyPlayer.OnPlayerChangesListener{
         override fun OnListenerAttached(item: PlayableMedia?) {
@@ -38,12 +38,15 @@ class PlayerActivity : AppCompatActivity() {
             tvArtist?.text = artist
             tvTitle?.text = title
 
-
-            var duration: Int? = MusifyPlayer.player?.duration
-            tvDuration?.text = if(duration != null) MusifyPlayer.getTimeString(duration.toLong()) else "0:00"
+            if(MusifyPlayer.isPlaying()) {
+                var duration: Int? = MusifyPlayer.player?.duration
+                tvDuration?.text = if (duration != null) MusifyPlayer.getTimeString(duration.toLong()) else "0:00"
+            }
+            else  tvDuration?.text = "0:00"
 
 
             ibPlayPause?.setImageResource(if(MusifyPlayer.isPlaying()) R.mipmap.ic_pause else R.mipmap.ic_play_arrow)
+            ibDownloaded?.setImageResource(if(MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy)R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow);
         }
 
         override fun OnPause(item: PlayableMedia?) {
@@ -70,7 +73,7 @@ class PlayerActivity : AppCompatActivity() {
             viewPager?.currentItem =  MusifyPlayer.playlistIndex
             viewPager?.addOnPageChangeListener(pagerListener)
 
-            rbDownloaded?.isChecked = MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy
+            ibDownloaded?.setImageResource(if(MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy)R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow);
         }
 
         override fun OnNewTrackStarted(item: PlayableMedia?) {
@@ -112,7 +115,7 @@ class PlayerActivity : AppCompatActivity() {
                 MusifyPlayer.playNext()
             }
 
-            rbDownloaded?.isChecked = MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy
+            ibDownloaded?.setImageResource(if(MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy)R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow);
         }
 
     }
@@ -133,13 +136,16 @@ class PlayerActivity : AppCompatActivity() {
         ibNext = findViewById(R.id.ibNext)
         ibPrevious = findViewById(R.id.ibPrevious)
         viewPager = findViewById(R.id.vpPlaylist)
-        rbDownloaded = findViewById(R.id.rbDownloaded)
+        ibDownloaded = findViewById(R.id.ibDownloaded)
 
-        findViewById<ImageButton>(R.id.ibTrackOptions).setOnClickListener {
+        ibDownloaded?.setOnClickListener {
+
             MusifyPlayer.getCurrentlyPlayedMusic().downloadOffline(object:PlayableMedia.MediaDownloadCallbacks{
                 override fun didDownload(downloaded: Boolean) {
                     viewPager?.adapter?.notifyDataSetChanged()
-                    rbDownloaded?.isChecked = MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy
+                    ibDownloaded?.setImageResource(if(MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy)R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow)
+
+                    Log.e("Download Task","Downloaded:"+downloaded)
                 }
             })
         }
@@ -163,7 +169,7 @@ class PlayerActivity : AppCompatActivity() {
 
         MusifyPlayer.addListener(playerListener)
 
-        playerListener.OnNewTrackStarted(MusifyPlayer.getCurrentlyPlayedMusic())
+//        playerListener.OnNewTrackStarted(MusifyPlayer.getCurrentlyPlayedMusic())
 
 
         sbMediaSeekbar?.setOnSeekBarChangeListener(object:SeekBar.OnSeekBarChangeListener{
