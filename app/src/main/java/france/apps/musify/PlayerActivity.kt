@@ -29,6 +29,8 @@ class PlayerActivity : AppCompatActivity() {
     internal var viewPager: ViewPager? = null
     internal var ibDownloaded: ImageButton? = null
 
+    internal var ibRepeat : ImageButton? = null;
+
     internal var playerListener: MusifyPlayer.OnPlayerChangesListener =  object:MusifyPlayer.OnPlayerChangesListener{
         override fun OnListenerAttached(item: PlayableMedia?) {
             var title = item?.title
@@ -137,6 +139,8 @@ class PlayerActivity : AppCompatActivity() {
         ibPrevious = findViewById(R.id.ibPrevious)
         viewPager = findViewById(R.id.vpPlaylist)
         ibDownloaded = findViewById(R.id.ibDownloaded)
+        ibRepeat = findViewById(R.id.ibRepeat)
+
 
         ibDownloaded?.setOnClickListener {
 
@@ -149,6 +153,33 @@ class PlayerActivity : AppCompatActivity() {
                 }
             })
         }
+
+        ibRepeat?.setOnClickListener(object: View.OnClickListener{
+            override fun onClick(v: View?) {
+
+                val repeatType = MusifyPlayer.getRepeatType()
+                if(repeatType!=null)
+                when(repeatType){
+                    MusifyPlayer.REPEAT_TYPE.NO_REPEAT ->{
+                        MusifyPlayer.setRepeatType(MusifyPlayer.REPEAT_TYPE.REPEAT_SINGLE)
+                        ibRepeat?.setImageResource(R.mipmap.ic_repeat_single)
+                    }
+                    MusifyPlayer.REPEAT_TYPE.REPEAT_SINGLE -> {
+                        MusifyPlayer.setRepeatType(MusifyPlayer.REPEAT_TYPE.REPEAT_ALL)
+                        ibRepeat?.setImageResource(R.mipmap.ic_repeat_all)
+                    }
+                    MusifyPlayer.REPEAT_TYPE.REPEAT_ALL -> {
+                        MusifyPlayer.setRepeatType(MusifyPlayer.REPEAT_TYPE.NO_REPEAT)
+                        ibRepeat?.setImageResource(R.mipmap.ic_repeat)
+                    }
+
+                }
+
+
+
+            }
+        })
+
 
         var ivDropPage:ImageView = findViewById(R.id.ivDropPage)
         ivDropPage.setOnClickListener(object:View.OnClickListener{

@@ -138,6 +138,7 @@ public class MusifyPlayer {
 
     public static void setRepeatType(REPEAT_TYPE repeat_type){
         repeatType = repeat_type;
+        Log.e("MusifyPlayer", "Changed repeat type");
     }
     public static REPEAT_TYPE getRepeatType(){
         return repeatType;//
@@ -541,16 +542,7 @@ public class MusifyPlayer {
             });
 
 
-            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    for (OnPlayerChangesListener listener : listeners)
-                        listener.OnCurrentTrackEnded(getCurrentlyPlayedMusic());
-
-                    handler.removeCallbacks(r);
-                    playNext();
-                }
-            });
+            player.setOnCompletionListener(playerCompletionListener);
 
             player.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
                 @Override
@@ -571,6 +563,46 @@ public class MusifyPlayer {
             ex.printStackTrace();
         }
     }
+    private static MediaPlayer.OnCompletionListener playerCompletionListener = new MediaPlayer.OnCompletionListener() {
+        @Override
+        public void onCompletion(MediaPlayer mp) {
+            for (OnPlayerChangesListener listener : listeners)
+                listener.OnCurrentTrackEnded(getCurrentlyPlayedMusic());
+
+            handler.removeCallbacks(r);
+
+
+            switch (repeatType){
+                case NO_REPEAT:
+                    {
+                        /*
+                         *  If repeat option is not set, check if the current track index is
+                         *  still within the playlist size so that we can move to next track.
+                         *  Otherwise, the player stops.
+                         */
+                        if(playlistIndex < getMusicPlaylist().size()-1)
+                            playNext();
+                    }
+                    break;
+                /*
+                 * Repeat the currently played track
+                 */
+                case REPEAT_SINGLE:
+                    play();
+                    break;
+                /*
+                 * playNext() implementations automatically goes back to first track of
+                 * the playlist if player is playing the last track.
+                 */
+                case REPEAT_ALL:
+                    playNext();
+
+                    break;
+            }
+
+
+        }
+    };
 
     private static void streamSnapshot(FileInputStream stream){
         try {
@@ -591,16 +623,7 @@ public class MusifyPlayer {
             });
 
 
-            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    for (OnPlayerChangesListener listener : listeners)
-                        listener.OnCurrentTrackEnded(getCurrentlyPlayedMusic());
-
-                    handler.removeCallbacks(r);
-                    playNext();
-                }
-            });
+            player.setOnCompletionListener(playerCompletionListener);
 
             player.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
                 @Override
