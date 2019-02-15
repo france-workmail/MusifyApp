@@ -36,6 +36,8 @@ public class MusifyApplication extends Application {
     }
 
     private static native String invokeNativeFunction();
+    private static native String getGooglePlayPackage();
+    private static native String getAmazonPackage();
 
     @Override
     public void onCreate() {
@@ -56,16 +58,16 @@ public class MusifyApplication extends Application {
 
 
 
-        if(isIllegallyDistributed(appContext,PACKAGE_NAME,GOOGLE_PLAY,AMAZON_STORE)){
-
-            Toast.makeText(appContext, "App installation should be from official channels only", Toast.LENGTH_LONG).show();
-            new CountDownTimer(5000, 1000) {
-                public void onTick(long millisUntilFinished) {}
-                public void onFinish() {System.exit(0);}
-            }.start();
-
-            return;
-        }
+//        if(isIllegallyDistributed(appContext,PACKAGE_NAME,getGooglePlayPackage(),getAmazonPackage())){
+//
+//            Toast.makeText(appContext, "App installation should be from official channels only", Toast.LENGTH_LONG).show();
+//            new CountDownTimer(5000, 1000) {
+//                public void onTick(long millisUntilFinished) {}
+//                public void onFinish() {System.exit(0);}
+//            }.start();
+//
+//            return;
+//        }
 
         String encKey = getEncryptedKey();
         Log.e("EncryptedKey", encKey);
@@ -126,8 +128,6 @@ public class MusifyApplication extends Application {
 
 
     private static final String PACKAGE_NAME = "france.apps.musify";
-    private static final String GOOGLE_PLAY = "com.android.vending";
-    private static final String AMAZON_STORE = "com.android.vending";
     public static boolean isIllegallyDistributed(Context context, String myPackageName, String google, String amazon)
     {
         //Renamed?
