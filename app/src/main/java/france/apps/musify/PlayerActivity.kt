@@ -149,44 +149,34 @@ class PlayerActivity : AppCompatActivity() {
                     viewPager?.adapter?.notifyDataSetChanged()
                     ibDownloaded?.setImageResource(if(MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy)R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow)
 
-                    Log.e("Download Task","Downloaded:"+downloaded)
+                    Log.e("Download Task", "Downloaded:$downloaded")
                 }
             })
         }
 
-        ibRepeat?.setOnClickListener(object: View.OnClickListener{
-            override fun onClick(v: View?) {
+        ibTrackQueue?.setOnClickListener { startActivity(Intent(this,TrackQueueActivity::class.java)) }
 
-                val repeatType = MusifyPlayer.getRepeatType()
-                if(repeatType!=null)
+        ibRepeat?.setOnClickListener {
+            val repeatType = MusifyPlayer.getRepeatType()
+            if(repeatType!=null) {
                 when(repeatType){
-                    MusifyPlayer.REPEAT_TYPE.NO_REPEAT ->{
+                    MusifyPlayer.REPEAT_TYPE.NO_REPEAT ->
                         MusifyPlayer.setRepeatType(MusifyPlayer.REPEAT_TYPE.REPEAT_SINGLE)
-                        ibRepeat?.setImageResource(R.mipmap.ic_repeat_single)
-                    }
-                    MusifyPlayer.REPEAT_TYPE.REPEAT_SINGLE -> {
+                    MusifyPlayer.REPEAT_TYPE.REPEAT_SINGLE ->
                         MusifyPlayer.setRepeatType(MusifyPlayer.REPEAT_TYPE.REPEAT_ALL)
-                        ibRepeat?.setImageResource(R.mipmap.ic_repeat_all)
-                    }
-                    MusifyPlayer.REPEAT_TYPE.REPEAT_ALL -> {
+                    MusifyPlayer.REPEAT_TYPE.REPEAT_ALL ->
                         MusifyPlayer.setRepeatType(MusifyPlayer.REPEAT_TYPE.NO_REPEAT)
-                        ibRepeat?.setImageResource(R.mipmap.ic_repeat)
-                    }
-
                 }
 
-
-
+                updateRepeatView()
             }
-        })
+        }
+        updateRepeatView()
+
 
 
         var ivDropPage:ImageView = findViewById(R.id.ivDropPage)
-        ivDropPage.setOnClickListener(object:View.OnClickListener{
-            override fun onClick(v: View?) {
-                finish()
-            }
-        })
+        ivDropPage.setOnClickListener { finish() }
 
 
         ibPlayPause?.setOnClickListener{ v->
@@ -253,6 +243,20 @@ class PlayerActivity : AppCompatActivity() {
         }
 
 
+    }
+    fun updateRepeatView(){
+        val repeatType = MusifyPlayer.getRepeatType()
+        if(repeatType!=null) {
+            when(repeatType){
+                MusifyPlayer.REPEAT_TYPE.NO_REPEAT ->
+                    ibRepeat?.setImageResource(R.mipmap.ic_repeat)
+                MusifyPlayer.REPEAT_TYPE.REPEAT_SINGLE ->
+                    ibRepeat?.setImageResource(R.mipmap.ic_repeat_single)
+                MusifyPlayer.REPEAT_TYPE.REPEAT_ALL ->
+                    ibRepeat?.setImageResource(R.mipmap.ic_repeat_all)
+
+            }
+        }
     }
 
     override fun onDestroy() {

@@ -152,7 +152,7 @@ public class MusifyPlayer {
         }
     }
     public static void removeListener(OnPlayerChangesListener onPlayerChangesListener){
-        if(onPlayerChangesListener!=null && listeners.contains(onPlayerChangesListener))
+        if(onPlayerChangesListener!=null)
             listeners.remove(onPlayerChangesListener);
     }
 
@@ -183,9 +183,7 @@ public class MusifyPlayer {
         }
 
 
-        PlayableMedia s = musicPlaylist.get(playlistIndex);
-
-        currentlyPlayedMusic = s;
+        currentlyPlayedMusic = musicPlaylist.get(playlistIndex);
 
 
 
