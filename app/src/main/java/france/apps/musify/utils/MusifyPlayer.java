@@ -95,7 +95,7 @@ public class MusifyPlayer {
     }
 
 
-    public static ArrayList<OnPlayerChangesListener> listeners = new ArrayList<>();
+    private static ArrayList<OnPlayerChangesListener> listeners = new ArrayList<>();
 
 
 

@@ -72,18 +72,19 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@mipmap/ic_arrow_up" />
 
-        <ImageView
-            android:id="@+id/imageView2"
+        <ImageButton
+            android:id="@+id/ibTrackQueue"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@mipmap/ic_playlist" />
+            app:srcCompat="@mipmap/ic_playlist"
+            android:scaleType="fitCenter"
+            android:background="@android:color/transparent"/>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -96,7 +97,7 @@
             android:layout_marginBottom="8dp"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/imageView2"
+            app:layout_constraintEnd_toStartOf="@+id/ibTrackQueue"
             app:layout_constraintStart_toEndOf="@+id/ivDropPage"
             app:layout_constraintTop_toTopOf="parent">
 

@@ -1,6 +1,7 @@
 package france.apps.musify
 
 import android.content.Context
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.view.PagerAdapter
@@ -29,7 +30,9 @@ class PlayerActivity : AppCompatActivity() {
     internal var viewPager: ViewPager? = null
     internal var ibDownloaded: ImageButton? = null
 
-    internal var ibRepeat : ImageButton? = null;
+    internal var ibRepeat : ImageButton? = null
+    internal var ibTrackQueue: ImageButton? = null
+
 
     internal var playerListener: MusifyPlayer.OnPlayerChangesListener =  object:MusifyPlayer.OnPlayerChangesListener{
         override fun OnListenerAttached(item: PlayableMedia?) {
@@ -41,14 +44,14 @@ class PlayerActivity : AppCompatActivity() {
             tvTitle?.text = title
 
             if(MusifyPlayer.isPlaying()) {
-                var duration: Int? = MusifyPlayer.player?.duration
+                val duration: Int? = MusifyPlayer.player?.duration?:0
                 tvDuration?.text = if (duration != null) MusifyPlayer.getTimeString(duration.toLong()) else "0:00"
             }
             else  tvDuration?.text = "0:00"
 
 
             ibPlayPause?.setImageResource(if(MusifyPlayer.isPlaying()) R.mipmap.ic_pause else R.mipmap.ic_play_arrow)
-            ibDownloaded?.setImageResource(if(MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy)R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow);
+            ibDownloaded?.setImageResource(if(MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy)R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow)
         }
 
         override fun OnPause(item: PlayableMedia?) {
@@ -140,6 +143,7 @@ class PlayerActivity : AppCompatActivity() {
         viewPager = findViewById(R.id.vpPlaylist)
         ibDownloaded = findViewById(R.id.ibDownloaded)
         ibRepeat = findViewById(R.id.ibRepeat)
+        ibTrackQueue = findViewById(R.id.ibTrackQueue)
 
 
         ibDownloaded?.setOnClickListener {

@@ -34,6 +34,9 @@
         <activity
             android:name=".PlayerActivity"
             android:theme="@style/FullScreen" />
+
+        <activity android:name=".TrackQueueActivity"
+            android:theme="@style/FullScreen" />
     </application>
 
 </manifest>
