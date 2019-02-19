@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black"
-    tools:context=".PlayerActivity">
+    tools:context=".PlayerActivity"
+    android:id="@+id/clRoot">
 
     <ImageButton
         android:id="@+id/ibPrevious"
@@ -54,7 +55,7 @@
         android:id="@+id/constraintLayout"
         android:layout_width="0dp"
         android:layout_height="50dp"
-        android:background="#999999"
+        android:background="@android:color/transparent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -131,7 +132,8 @@
         app:layout_constraintHeight_default="percent"
         app:layout_constraintHeight_percent="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        android:overScrollMode="never"/>
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/constraintLayout3"

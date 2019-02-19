@@ -1,20 +1,41 @@
 package france.apps.musify
 
+import android.animation.ArgbEvaluator
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
+import android.graphics.Color
+import android.graphics.LinearGradient
+import android.graphics.Shader
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.PaintDrawable
+import android.graphics.drawable.ShapeDrawable.ShaderFactory
+import android.graphics.drawable.TransitionDrawable
+import android.graphics.drawable.shapes.RectShape
 import android.os.Bundle
+import android.support.constraint.ConstraintLayout
 import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager
+import android.support.v7.app.AppCompatActivity
+import android.support.v7.graphics.Palette
 import android.support.v7.widget.AppCompatSeekBar
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.SeekBar
+import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import france.apps.musify.utils.MusifyPlayer
 import france.apps.musify.utils.models.PlayableMedia
+
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -32,6 +53,8 @@ class PlayerActivity : AppCompatActivity() {
 
     internal var ibRepeat : ImageButton? = null
     internal var ibTrackQueue: ImageButton? = null
+    internal var clRoot: ConstraintLayout? = null
+
 
 
     internal var playerListener: MusifyPlayer.OnPlayerChangesListener =  object:MusifyPlayer.OnPlayerChangesListener{
@@ -78,11 +101,12 @@ class PlayerActivity : AppCompatActivity() {
             viewPager?.currentItem =  MusifyPlayer.playlistIndex
             viewPager?.addOnPageChangeListener(pagerListener)
 
-            ibDownloaded?.setImageResource(if(MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy)R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow);
+            ibDownloaded?.setImageResource(if(MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy)R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow)
+            updatePlayerBackground()
         }
 
         override fun OnNewTrackStarted(item: PlayableMedia?) {
-            var duration: Int? = MusifyPlayer.player?.duration
+            val duration: Int? = MusifyPlayer.player?.duration
             tvDuration?.text = if(duration != null) MusifyPlayer.getTimeString(duration.toLong()) else "0:00"
 
 
@@ -120,15 +144,52 @@ class PlayerActivity : AppCompatActivity() {
                 MusifyPlayer.playNext()
             }
 
-            ibDownloaded?.setImageResource(if(MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy)R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow);
+            ibDownloaded?.setImageResource(if(MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy)R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow)
         }
 
     }
+
+    fun updatePlayerBackground(){
+            val currentItem = viewPager?.currentItem!!
+            val color = (viewPager?.adapter as PlaylistPagerAdapter).vibrantColors[currentItem]
+
+
+            val shader = object: ShaderFactory() {
+                override fun resize(width: Int, height: Int): Shader {
+                    return LinearGradient(0.0f,0.0f,0.0f,clRoot?.height!!.toFloat(),
+                            intArrayOf(color,Color.BLACK),
+                            floatArrayOf(0.0f,0.95f),
+                            Shader.TileMode.REPEAT)
+
+                }
+
+            }
+
+            val paintDrawable = PaintDrawable()
+            paintDrawable.shape = RectShape()
+            paintDrawable.shaderFactory = shader
+
+
+        currentBackgroundDrawable = currentBackgroundDrawable?:clRoot?.background as Drawable
+
+        var transitionDrawable = TransitionDrawable(arrayOf(currentBackgroundDrawable,paintDrawable))
+        clRoot?.background = transitionDrawable
+        transitionDrawable.startTransition(300)
+
+        currentBackgroundDrawable = paintDrawable
+
+
+    }
+
+    internal var currentBackgroundDrawable:Drawable? = null
+
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
+        clRoot = findViewById(R.id.clRoot)
         sbMediaSeekbar = findViewById(R.id.sbMediaSeekbar)
         tvCurrentTime = findViewById(R.id.tvCurrentTime)
         tvDuration = findViewById(R.id.tvDuration)
@@ -179,7 +240,7 @@ class PlayerActivity : AppCompatActivity() {
 
 
 
-        var ivDropPage:ImageView = findViewById(R.id.ivDropPage)
+        val ivDropPage:ImageView = findViewById(R.id.ivDropPage)
         ivDropPage.setOnClickListener { finish() }
 
 
@@ -193,8 +254,6 @@ class PlayerActivity : AppCompatActivity() {
 
 
         MusifyPlayer.addListener(playerListener)
-
-//        playerListener.OnNewTrackStarted(MusifyPlayer.getCurrentlyPlayedMusic())
 
 
         sbMediaSeekbar?.setOnSeekBarChangeListener(object:SeekBar.OnSeekBarChangeListener{
@@ -211,7 +270,7 @@ class PlayerActivity : AppCompatActivity() {
         })
 
 
-        var adapter = PlaylistPagerAdapter(MusifyPlayer.getMusicPlaylist(),this)
+        val adapter = PlaylistPagerAdapter(MusifyPlayer.getMusicPlaylist(),this)
         viewPager?.adapter = adapter
         viewPager?.currentItem = MusifyPlayer.playlistIndex
 
@@ -219,7 +278,7 @@ class PlayerActivity : AppCompatActivity() {
 
 
         viewPager?.addOnPageChangeListener(pagerListener)
-
+        updatePlayerBackground()
 
         ibNext?.setOnClickListener {
             var index = viewPager!!.currentItem + 1
@@ -273,10 +332,15 @@ class PlayerActivity : AppCompatActivity() {
     internal inner class PlaylistPagerAdapter(var list:ArrayList<PlayableMedia>, var mContext: Context) : PagerAdapter() {
 
 
-        internal var inflater:LayoutInflater? = null
+        private var inflater:LayoutInflater? = null
+        var vibrantColors:ArrayList<Int> = ArrayList(list.size)
 
         init {
              inflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+            for(index  in list.indices){
+                vibrantColors.add(Color.BLACK)
+            }
         }
 
 
@@ -288,15 +352,43 @@ class PlayerActivity : AppCompatActivity() {
             return list.size
         }
 
+
+
         override fun instantiateItem(container: ViewGroup, position: Int): Any {
-            var imageView = ImageView(mContext)
-            imageView.layoutParams  = ViewGroup.LayoutParams(viewPager!!.width,viewPager!!.height)
+            val imageView = ImageView(mContext)
+            imageView.setBackgroundColor(Color.TRANSPARENT)
+            container.setBackgroundColor(Color.TRANSPARENT)
+//            imageView.layoutParams  = ViewGroup.LayoutParams(viewPager!!.width,viewPager!!.height)
 
+            imageView.layoutParams  = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT)
 
-            if(list[position].audio_image != null){
+            if(list[position].audio_image.isNotEmpty()){
+
                 Glide.with(mContext)
                         .load(list[position].audio_image)
+                        .listener(object : RequestListener<Drawable> {
+                            override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+
+
+                                return false
+                            }
+
+                            override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                                val p = Palette.from((resource as BitmapDrawable).bitmap).generate()
+
+                                vibrantColors[position] = p.getVibrantColor(Color.DKGRAY)
+
+                                if(viewPager?.currentItem == position){
+                                    updatePlayerBackground()
+                                }
+
+
+                                return false
+                            }
+
+                        })
                         .into(imageView)
+
 
             }else imageView.setImageResource(android.R.drawable.ic_menu_report_image)
 
