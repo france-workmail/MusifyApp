@@ -2,6 +2,7 @@ package france.apps.musify;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.widget.Toast;
@@ -23,6 +24,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import france.apps.musify.utils.Constants;
+import france.apps.musify.utils.MusifyPlayer;
+import france.apps.musify.utils.NotificationService;
 
 public class MusifyApplication extends Application {
 
@@ -73,6 +76,14 @@ public class MusifyApplication extends Application {
         Log.e("EncryptedKey", encKey);
         Toast.makeText(appContext,encKey,Toast.LENGTH_LONG).show();
     }
+
+    @Override
+    public void onTerminate() {
+        MusifyPlayer.destroy();
+        super.onTerminate();
+    }
+
+
 
     public static String getEncryptedKey(){
 
