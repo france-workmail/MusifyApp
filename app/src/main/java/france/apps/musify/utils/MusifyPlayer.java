@@ -1,12 +1,16 @@
 package france.apps.musify.utils;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
@@ -28,10 +32,10 @@ public class MusifyPlayer {
 
 
     private static ArrayList<PlayableMedia> musicPlaylist, shuffledPlayList;
-    public static int playlistIndex =0;
+    public static int playlistIndex = 0;
     public static boolean isShuffledPlaying = false;
     public static boolean isCurrentTrackPrepared = false;
-    private static  PlayableMedia currentlyPlayedMusic = null;
+    private static PlayableMedia currentlyPlayedMusic = null;
 
     private static REPEAT_TYPE repeatType = REPEAT_TYPE.NO_REPEAT;
 
@@ -74,7 +78,6 @@ public class MusifyPlayer {
     };
 
 
-
     public enum REPEAT_TYPE {
         NO_REPEAT,
         REPEAT_ALL,
@@ -82,21 +85,24 @@ public class MusifyPlayer {
     }
 
 
-
-
-    public interface OnPlayerChangesListener{
+    public interface OnPlayerChangesListener {
         void OnPause(PlayableMedia item);
+
         void OnPlay(PlayableMedia item);
+
         void OnNewTrackOpened(PlayableMedia item);
+
         void OnNewTrackStarted(PlayableMedia item);
+
         void OnCurrentTrackEnded(PlayableMedia item);
+
         void OnCurrentTrackTimeUpdated(PlayableMedia item, float currentTime, int progressPercentage);
+
         void OnListenerAttached(PlayableMedia item);//handles all initialization/re-initializations
     }
 
 
     private static ArrayList<OnPlayerChangesListener> listeners = new ArrayList<>();
-
 
 
     private static Handler handler = new Handler();
@@ -105,22 +111,21 @@ public class MusifyPlayer {
         public void run() {
 
             PlayableMedia item = getCurrentlyPlayedMusic();
-            if(item!=null&&player.isPlaying()){
+            if (item != null && player.isPlaying()) {
 
 //                int currentProgressPercentage = (int) (((double) PlayerUtil.player.getCurrentPosition() / PlayerUtil.player.getDuration()) * 100);
 
-                handler.postDelayed(this,1000);
-                int currentPosition = Math.round(player.getCurrentPosition()/1000) *1000;
+                handler.postDelayed(this, 1000);
+                int currentPosition = Math.round(player.getCurrentPosition() / 1000) * 1000;
 
+                int progressPercentage = (int) ((((float) player.getCurrentPosition()) / ((float) player.getDuration())) * 100);
 
-                int progressPercentage = (int) (( ((float)player.getCurrentPosition()) /   ((float)player.getDuration())) * 100);
-
-                for(OnPlayerChangesListener l:listeners){
-                    l.OnCurrentTrackTimeUpdated(item,currentPosition, progressPercentage);
+                for (OnPlayerChangesListener l : listeners) {
+                    l.OnCurrentTrackTimeUpdated(item, currentPosition, progressPercentage);
                 }
 
 
-            }else
+            } else
                 handler.removeCallbacks(this);
 
         }
@@ -136,47 +141,48 @@ public class MusifyPlayer {
 
     //setters and getters
 
-    public static void setRepeatType(REPEAT_TYPE repeat_type){
+    public static void setRepeatType(REPEAT_TYPE repeat_type) {
         repeatType = repeat_type;
         Log.e("MusifyPlayer", "Changed repeat type");
     }
-    public static REPEAT_TYPE getRepeatType(){
+
+    public static REPEAT_TYPE getRepeatType() {
         return repeatType;//
     }
 
 
-    public static void addListener(OnPlayerChangesListener onPlayerChangesListener){
-        if(onPlayerChangesListener!=null && !listeners.contains(onPlayerChangesListener)) {
+    public static void addListener(OnPlayerChangesListener onPlayerChangesListener) {
+        if (onPlayerChangesListener != null && !listeners.contains(onPlayerChangesListener)) {
             listeners.add(onPlayerChangesListener);
             onPlayerChangesListener.OnListenerAttached(getCurrentlyPlayedMusic());
         }
     }
-    public static void removeListener(OnPlayerChangesListener onPlayerChangesListener){
-        if(onPlayerChangesListener!=null)
+
+    public static void removeListener(OnPlayerChangesListener onPlayerChangesListener) {
+        if (onPlayerChangesListener != null)
             listeners.remove(onPlayerChangesListener);
     }
-
 
 
     //support methods
 
 
-    public static void playPlaylist(ArrayList<PlayableMedia> playlist){
+    public static void playPlaylist(ArrayList<PlayableMedia> playlist) {
         musicPlaylist = playlist;
         playlistIndex = 0;
         play();
     }
-    public static void playPlaylist(ArrayList<PlayableMedia> playlist, int index){
+
+    public static void playPlaylist(ArrayList<PlayableMedia> playlist, int index) {
         musicPlaylist = playlist;
         playlistIndex = index;
         play();
     }
 
-    private static void play(){
+    private static void play() {
 
 
-
-        if(player!=null && player.isPlaying()){
+        if (player != null && player.isPlaying()) {
             player.stop();
             player.reset();
             player.release();
@@ -186,43 +192,37 @@ public class MusifyPlayer {
         currentlyPlayedMusic = musicPlaylist.get(playlistIndex);
 
 
-
-
         playAudio(currentlyPlayedMusic.getAudio_url());
 
 
-
-
-        for(OnPlayerChangesListener listener: listeners){
+        for (OnPlayerChangesListener listener : listeners) {
 
             listener.OnNewTrackOpened(getCurrentlyPlayedMusic());
 
         }
     }
 
-    public static boolean isPlaying(){
+    public static boolean isPlaying() {
         try {
-            return player!=null && player.isPlaying();
+            return player != null && player.isPlaying();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public static void shufflePlaylist(boolean shouldShuffle)
-    {
+    public static void shufflePlaylist(boolean shouldShuffle) {
 
-        if(musicPlaylist == null)
-            return ;
+        if (musicPlaylist == null)
+            return;
 
-        if(musicPlaylist.size()>1){
+        if (musicPlaylist.size() > 1) {
 
-            if(shouldShuffle){
+            if (shouldShuffle) {
                 Collections.shuffle(musicPlaylist);
 
                 playlistIndex = musicPlaylist.indexOf(currentlyPlayedMusic);
-            }
-            else{
+            } else {
 
                 playlistIndex = musicPlaylist.indexOf(currentlyPlayedMusic);
             }
@@ -232,62 +232,59 @@ public class MusifyPlayer {
 
     }
 
-    public static void playOrPause(){
-        if(player==null)
+    public static void playOrPause() {
+        if (player == null)
             return;
-        if(player.isPlaying()){
+        if (player.isPlaying()) {
 
             player.pause();
-            for(OnPlayerChangesListener listener: listeners)
+            for (OnPlayerChangesListener listener : listeners)
                 listener.OnPause(getCurrentlyPlayedMusic());
             handler.removeCallbacks(r);
-        }
-        else{
+        } else {
 
             player.start();
-            for(OnPlayerChangesListener listener: listeners)
+            for (OnPlayerChangesListener listener : listeners)
                 listener.OnPlay(getCurrentlyPlayedMusic());
-            handler.postDelayed(r,1000);
+            handler.postDelayed(r, 1000);
         }
     }
 
 
-    public static void playPrevious(){
-        if(musicPlaylist==null)
+    public static void playPrevious() {
+        if (musicPlaylist == null)
             return;
-        if(musicPlaylist.size()<=0)
+        if (musicPlaylist.size() <= 0)
             return;
 
-        if((playlistIndex-1)>=0){
+        if ((playlistIndex - 1) >= 0) {
 
             playlistIndex--;
-        }
-        else{
+        } else {
 
-            playlistIndex = musicPlaylist.size()-1;
+            playlistIndex = musicPlaylist.size() - 1;
         }
 
         play();
     }
 
 
-    static boolean canPlayNextOrPrevious(){
+    static boolean canPlayNextOrPrevious() {
 
-        return musicPlaylist!=null && musicPlaylist.size()>0;
+        return musicPlaylist != null && musicPlaylist.size() > 0;
     }
 
-    public static void playNext(){
+    public static void playNext() {
 
-        if(musicPlaylist==null)
+        if (musicPlaylist == null)
             return;
-        if(musicPlaylist.size()<=0)
+        if (musicPlaylist.size() <= 0)
             return;
 
-        if((playlistIndex+1)<(musicPlaylist.size())){
+        if ((playlistIndex + 1) < (musicPlaylist.size())) {
 
             playlistIndex++;
-        }
-        else{
+        } else {
 
             playlistIndex = 0;
         }
@@ -297,7 +294,7 @@ public class MusifyPlayer {
     }
 
 
-    public static PlayableMedia getCurrentlyPlayedMusic(){
+    public static PlayableMedia getCurrentlyPlayedMusic() {
         return currentlyPlayedMusic;
 
     }
@@ -307,15 +304,15 @@ public class MusifyPlayer {
         play();
     }
 
-    public static void seekToTrackPercentage(int trackDurationPercentage){
+    public static void seekToTrackPercentage(int trackDurationPercentage) {
 
 
         try {
-            if (player != null){
+            if (player != null) {
                 int seekToValue = (player.getDuration() * trackDurationPercentage) / 100;
                 player.seekTo(seekToValue);
             }
-        }catch (IllegalStateException ex){
+        } catch (IllegalStateException ex) {
             //cannot seek mediaplayer
             ex.printStackTrace();
         }
@@ -324,26 +321,26 @@ public class MusifyPlayer {
     private static void playAudio(String url) {
 
 
-
         //setup headset hardware
-        initMediaRemote();
+//        initMediaRemote();
+        initMediaRemote2();
 
 
-            //setup player
+        //setup player
 
 
-            if (player != null) {
-                player.release();
-                player = null;
-            }
-            player = new MediaPlayer();
-            if (!URLUtil.isValidUrl(url))
-                playNext();
+        if (player != null) {
+            player.release();
+            player = null;
+        }
+        player = new MediaPlayer();
+        if (!URLUtil.isValidUrl(url))
+            playNext();
 
-            //TODO Add media caching.
-            // Reference: https://stackoverflow.com/questions/12701249/getting-access-to-media-player-cache
+        //TODO Add media caching.
+        // Reference: https://stackoverflow.com/questions/12701249/getting-access-to-media-player-cache
 
-            if (Constants.OFFLINE_MODE) {
+        if (Constants.OFFLINE_MODE) {
 //                new AudioStreamWorkerTask(MusifyApplication.getAppContext(), new OnCacheCallback() {
 //                    @Override
 //                    public void onSuccess(FileInputStream stream) {
@@ -404,10 +401,10 @@ public class MusifyPlayer {
 //                    }
 //                }).execute(audio_url);
 
-                new MediaCacheWorkerTask(MusifyApplication.getAppContext(), new MediaCacheCallback() {
-                    @Override
-                    public void onSnapshotFound(FileInputStream stream) {
-                        streamSnapshot(stream);
+            new MediaCacheWorkerTask( new MediaCacheCallback() {
+                @Override
+                public void onSnapshotFound(FileInputStream stream) {
+                    streamSnapshot(stream);
 //                        try {
 //                            player.setDataSource(stream.getFD());
 //                            player.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -454,20 +451,21 @@ public class MusifyPlayer {
 //                        } catch (IOException e) {
 //                            e.printStackTrace();
 //                        }
-                    }
+                }
 
-                    @Override
-                    public void onSnapshotMissing(String url) {
-                        streamThroughNet(url);
-                    }
+                @Override
+                public void onSnapshotMissing(String url) {
+                    streamThroughNet(url);
+                }
 
-                    @Override
-                    public void onSnapshotDownloaded(boolean downloaded) {}
-                }).execute(url);
-            }
-            //stream using internet
-            else {
-                streamThroughNet(url);
+                @Override
+                public void onSnapshotDownloaded(boolean downloaded) {
+                }
+            }).execute(url);
+        }
+        //stream using internet
+        else {
+            streamThroughNet(url);
 
 //                try{
 //                //Without Caching Callback
@@ -520,8 +518,8 @@ public class MusifyPlayer {
         }
     }
 
-    private static void streamThroughNet(String url){
-        try{
+    private static void streamThroughNet(String url) {
+        try {
             //Without Caching Callback
             player.setDataSource(url);
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -555,12 +553,13 @@ public class MusifyPlayer {
             //assign ui
             isCurrentTrackPrepared = false;
             player.prepareAsync();
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-        } catch(IllegalStateException ex){
+        } catch (IllegalStateException ex) {
             ex.printStackTrace();
         }
     }
+
     private static MediaPlayer.OnCompletionListener playerCompletionListener = new MediaPlayer.OnCompletionListener() {
         @Override
         public void onCompletion(MediaPlayer mp) {
@@ -570,18 +569,17 @@ public class MusifyPlayer {
             handler.removeCallbacks(r);
 
 
-            switch (repeatType){
-                case NO_REPEAT:
-                    {
-                        /*
-                         *  If repeat option is not set, check if the current track index is
-                         *  still within the playlist size so that we can move to next track.
-                         *  Otherwise, the player stops.
-                         */
-                        if(playlistIndex < getMusicPlaylist().size()-1)
-                            playNext();
-                    }
-                    break;
+            switch (repeatType) {
+                case NO_REPEAT: {
+                    /*
+                     *  If repeat option is not set, check if the current track index is
+                     *  still within the playlist size so that we can move to next track.
+                     *  Otherwise, the player stops.
+                     */
+                    if (playlistIndex < getMusicPlaylist().size() - 1)
+                        playNext();
+                }
+                break;
                 /*
                  * Repeat the currently played track
                  */
@@ -602,7 +600,7 @@ public class MusifyPlayer {
         }
     };
 
-    private static void streamSnapshot(FileInputStream stream){
+    private static void streamSnapshot(FileInputStream stream) {
         try {
             player.setDataSource(stream.getFD());
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -639,7 +637,7 @@ public class MusifyPlayer {
             player.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
-        }catch(IllegalStateException ex){
+        } catch (IllegalStateException ex) {
             ex.printStackTrace();
         }
     }
@@ -670,9 +668,9 @@ public class MusifyPlayer {
         return finalTimerString;
     }
 
-    public static void initializePlayerWithMusic(ArrayList<PlayableMedia> mPlaylist,int songIndex){
+    public static void initializePlayerWithMusic(ArrayList<PlayableMedia> mPlaylist, int songIndex) {
 
-        if(!listeners.contains(listener))
+        if (!listeners.contains(listener))
             listeners.add(listener);
 
         musicPlaylist = mPlaylist;
@@ -683,37 +681,35 @@ public class MusifyPlayer {
 
 
     public static void playTrack(PlayableMedia item) {
-        if(musicPlaylist == null)
+        if (musicPlaylist == null)
             musicPlaylist = new ArrayList<>();
 
         musicPlaylist.add(item);
-        Log.e("dsada",listeners.toString());
+        Log.e("dsada", listeners.toString());
 
         playPlaylist(musicPlaylist);
     }
 
-    public static void destroy(){
-        if(MusifyPlayer.isPlaying()){
+    public static void destroy() {
+        if (MusifyPlayer.isPlaying()) {
             MusifyPlayer.player.stop();
             MusifyPlayer.player.reset();
         }
     }
 
 
-    public static ArrayList<PlayableMedia> getMusicPlaylist(){
+    public static ArrayList<PlayableMedia> getMusicPlaylist() {
         return musicPlaylist;
     }
 
 
     /**
-     *
-     *
      * METHODS TO MONITOR REMOTE DEVICE
-     *
      */
 
     static MediaSessionCompat mediaSessionCompat;
-    private static void initMediaRemote(){
+
+    private static void initMediaRemote() {
 
 //        if(mAudioManager==null || mRemoteControlResponder == null) {
 //            mAudioManager = (AudioManager) MusifyApplication.getAppContext().getSystemService(Context.AUDIO_SERVICE);
@@ -759,8 +755,7 @@ public class MusifyPlayer {
 //        mediaSessionCompat.setActive(true);
 
 
-
-        if(mediaSessionCompat==null) {
+        if (mediaSessionCompat == null) {
             ComponentName mediaReceiver = new ComponentName(MusifyApplication.getAppContext(), HeadsetButtonReceiver.class);
             mediaSessionCompat = new MediaSessionCompat(MusifyApplication.getAppContext(), "MediaButtons", mediaReceiver, null);
             mediaSessionCompat.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
@@ -792,6 +787,7 @@ public class MusifyPlayer {
 
             });
 
+
             mediaSessionCompat.setActive(true);
 
             PlaybackStateCompat playbackStateCompat = new PlaybackStateCompat.Builder()
@@ -809,5 +805,54 @@ public class MusifyPlayer {
         }
 
 
+    }
+
+
+    public static void initMediaRemote2() {
+        MediaSession session = new MediaSession(MusifyApplication.getAppContext(), "MusifySession");
+        session.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+        session.setCallback(new MediaSession.Callback() {
+            @Override
+            public void onPlay() {
+                super.onPlay();
+                playOrPause();
+            }
+
+            @Override
+            public void onPause() {
+                super.onPause();
+                playOrPause();
+            }
+
+            @Override
+            public void onSkipToNext() {
+                super.onSkipToNext();
+                playNext();
+            }
+
+            @Override
+            public void onSkipToPrevious() {
+                super.onSkipToPrevious();
+                playPrevious();
+            }
+        });
+        session.setActive(true);
+
+        PlaybackState playbackStateCompat = new PlaybackState.Builder()
+                .setActions(
+                        PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PLAY_PAUSE |
+                                PlaybackState.ACTION_PLAY_FROM_MEDIA_ID | PlaybackState.ACTION_PAUSE |
+                                PlaybackState.ACTION_SKIP_TO_NEXT | PlaybackState.ACTION_SKIP_TO_PREVIOUS
+
+                )
+                .setState(PlaybackState.STATE_NONE, 0, 1, SystemClock.elapsedRealtime())
+                .build();
+        session.setPlaybackState(playbackStateCompat);
+
+        Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        mediaButtonIntent.setComponent(new ComponentName(MusifyApplication.getAppContext(),HeadsetButtonReceiver.class));
+        PendingIntent mediaPendingIntent = PendingIntent.getBroadcast(MusifyApplication.getAppContext(), 0, mediaButtonIntent, 0);
+        session.setMediaButtonReceiver(mediaPendingIntent);
     }
 }

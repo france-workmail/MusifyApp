@@ -2,6 +2,7 @@ package france.apps.musify.utils.models
 
 import com.google.firebase.database.PropertyName
 import france.apps.musify.MusifyApplication
+import france.apps.musify.utils.OfflinePlaylistTracker
 import france.apps.musify.utils.cache.new_cache.MediaCacheCallback
 import france.apps.musify.utils.cache.new_cache.MediaCacheWorkerTask
 import java.io.FileInputStream
@@ -27,7 +28,7 @@ class PlayableMedia(@set:PropertyName("id")
     var isDownloading = false
 
     init {
-        MediaCacheWorkerTask(MusifyApplication.getAppContext(), object : MediaCacheCallback {
+        MediaCacheWorkerTask(object : MediaCacheCallback {
             override fun onSnapshotFound(stream: FileInputStream) {
                 hasOfflineCopy = true
             }
@@ -50,7 +51,7 @@ class PlayableMedia(@set:PropertyName("id")
 
     fun downloadOffline(callback:MediaDownloadCallbacks){
         if(!hasOfflineCopy) {
-            MediaCacheWorkerTask(MusifyApplication.getAppContext(), object : MediaCacheCallback {
+            MediaCacheWorkerTask( object : MediaCacheCallback {
                 override fun onSnapshotFound(stream: FileInputStream) {}
 
                 override fun onSnapshotMissing(url: String) {}
@@ -58,11 +59,25 @@ class PlayableMedia(@set:PropertyName("id")
                     hasOfflineCopy = downloaded
                     isDownloading = false
                     callback.didDownload(downloaded)
+
+                    if(downloaded){
+                        OfflinePlaylistTracker.saveOfflineTrack(this@PlayableMedia)
+                    }
                 }
             }, true).execute(audio_url)
 
             isDownloading = true
         }
+    }
+    fun deleteOffline(): Boolean{
+        if(hasOfflineCopy){
+            var deleted =  OfflinePlaylistTracker.removeFromOffline(this@PlayableMedia)
+
+            hasOfflineCopy = !deleted
+
+            return  deleted
+        }
+        return false
     }
 
     public interface MediaDownloadCallbacks {

@@ -2,6 +2,7 @@ package france.apps.musify.menufragments
 
 
 import android.content.Context
+import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.annotation.NonNull
@@ -15,8 +16,10 @@ import android.view.ViewGroup
 import android.widget.*
 import com.bumptech.glide.Glide
 import com.google.firebase.database.*
+import france.apps.musify.PlayerActivity
 
 import france.apps.musify.R
+import france.apps.musify.SettingsActivity
 import france.apps.musify.databinding.FragmentHomeBinding
 import france.apps.musify.utils.MusifyDB
 import france.apps.musify.utils.MusifyPlayer
@@ -94,7 +97,12 @@ class HomeFragment : Fragment() {
              v ->
              Toast.makeText(activity,"Created by: France Gelasque. App Icon credits to: smalllikeart of www.flaticon.com",Toast.LENGTH_SHORT).show()
          }
+         view.findViewById<ImageButton>(R.id.ibSettings).setOnClickListener {
+             v ->
 
+
+             startActivity(Intent(activity, SettingsActivity::class.java))
+         }
 
          newReleasesAdapter = SongsAdapter(newReleases, activity!!)
          rvNewReleases = view.findViewById(R.id.rvNewReleases)

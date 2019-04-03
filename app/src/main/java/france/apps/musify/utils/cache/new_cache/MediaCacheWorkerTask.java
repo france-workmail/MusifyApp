@@ -25,16 +25,17 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
     private Context context = null;
 
 
-    private static DiskLruCache.Editor currentEditor = null;
-    private static String urlToDownload = null;
+    private DiskLruCache.Editor currentEditor = null;
+
+    private String urlToDownload = null;
     private boolean downloadWhenNotInCache = false;
 
-    public MediaCacheWorkerTask(Context context, MediaCacheCallback callback) {
-        this.context = context;
+    public MediaCacheWorkerTask(MediaCacheCallback callback) {
+        this.context = MusifyApplication.getAppContext();
         this.callback = callback;
     }
-    public MediaCacheWorkerTask(Context context, MediaCacheCallback callback, boolean downloadWhenNotInCache) {
-        this(context,callback);
+    public MediaCacheWorkerTask(MediaCacheCallback callback, boolean downloadWhenNotInCache) {
+        this(callback);
         this.downloadWhenNotInCache = downloadWhenNotInCache;
     }
 
@@ -100,9 +101,10 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
                 if( urlToDownload!=null && downloadWhenNotInCache){
 
                     try {
-                        if(currentEditor==null) {
-                            currentEditor = MusifyApplication.getDiskCache(context).edit(fileKey);
-                        }
+
+
+                        currentEditor = null;
+                        currentEditor = MusifyApplication.getDiskCache(context).edit(fileKey);
                         if(currentEditor == null){
                             callback.onSnapshotDownloaded(false);
                             return;
@@ -114,24 +116,24 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
                     }
 
                 }
-                else{
-                    try {
-                        if (currentEditor != null) {
-                            currentEditor.abort();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }catch (IllegalStateException ex){
-                        ex.printStackTrace();
-                    }
-                }
+//                else{
+//                    try {
+//                        if (currentEditor != null) {
+//                            currentEditor.abort();
+//                        }
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }catch (IllegalStateException ex){
+//                        ex.printStackTrace();
+//                    }
+//                }
             }
         }
         callback = null;
         context = null;
     }
 
-    static class DownloadUrlToStreamTask extends AsyncTask<Void,Void,Boolean>{
+    class DownloadUrlToStreamTask extends AsyncTask<Void,Void,Boolean>{
 
 
         MediaCacheCallback downloadCallback;
@@ -145,6 +147,7 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
 
             final int DISK_CACHE_INDEX = 0;
             try {
+
                 boolean downloaded = downloadUrlToStream(urlToDownload,currentEditor.newOutputStream(DISK_CACHE_INDEX));
 
                 if(downloaded) {
@@ -172,7 +175,7 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
             downloadCallback.onSnapshotDownloaded(s);
         }
 
-        public boolean downloadUrlToStream(String urlString, OutputStream outputStream) {
+        private boolean downloadUrlToStream(String urlString, OutputStream outputStream) {
             HttpURLConnection urlConnection = null;
             try {
                 final URL url = new URL(urlString);
@@ -200,7 +203,7 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
         return getClass().getSimpleName();
     }
 
-    private String hashKeyForDisk(String key) {
+    private static String hashKeyForDisk(String key) {
         String cacheKey;
         try {
             final MessageDigest mDigest = MessageDigest.getInstance("MD5");
@@ -212,7 +215,7 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
         return cacheKey;
     }
 
-    private String bytesToHexString(byte[] bytes) {
+    private static String bytesToHexString(byte[] bytes) {
         // http://stackoverflow.com/questions/332079
         StringBuilder sb = new StringBuilder();
         for (byte aByte : bytes) {
@@ -222,5 +225,10 @@ public class MediaCacheWorkerTask extends AsyncTask<String, Void, FileInputStrea
             sb.append(hex);
         }
         return sb.toString();
+    }
+
+
+    public static String getHashKeyForString(String str){
+        return hashKeyForDisk(str);
     }
 }

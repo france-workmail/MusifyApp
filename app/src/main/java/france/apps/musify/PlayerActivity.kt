@@ -209,14 +209,21 @@ class PlayerActivity : AppCompatActivity() {
 
         ibDownloaded?.setOnClickListener {
 
-            MusifyPlayer.getCurrentlyPlayedMusic().downloadOffline(object:PlayableMedia.MediaDownloadCallbacks{
-                override fun didDownload(downloaded: Boolean) {
-                    viewPager?.adapter?.notifyDataSetChanged()
-                    ibDownloaded?.setImageResource(if(MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy)R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow)
+            if(!MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy) {
+                MusifyPlayer.getCurrentlyPlayedMusic().downloadOffline(object : PlayableMedia.MediaDownloadCallbacks {
+                    override fun didDownload(downloaded: Boolean) {
+                        viewPager?.adapter?.notifyDataSetChanged()
+                        ibDownloaded?.setImageResource(if (MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy) R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow)
 
-                    Log.e("Download Task", "Downloaded:$downloaded")
-                }
-            })
+                        Log.e("Download Task", "Downloaded:$downloaded")
+                    }
+                })
+            }else { //delete it
+                Log.e("TAG","Deleting track")
+                MusifyPlayer.getCurrentlyPlayedMusic().deleteOffline()
+
+                ibDownloaded?.setImageResource(if (MusifyPlayer.getCurrentlyPlayedMusic().hasOfflineCopy) R.mipmap.ic_downloaded_arrow else R.mipmap.ic_download_arrow)
+            }
         }
 
         ibTrackQueue?.setOnClickListener { startActivity(Intent(this,TrackQueueActivity::class.java)) }
