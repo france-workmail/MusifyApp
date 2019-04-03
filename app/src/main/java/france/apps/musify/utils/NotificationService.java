@@ -40,6 +40,16 @@ public class NotificationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+//        if ((flags & START_FLAG_REDELIVERY)!=0) { // if crash restart...
+//            // do something here
+//            showNotification();
+//        }
+
+//        if(intent == null){
+//            stopSelf();
+//            return START_NOT_STICKY;
+//        }
+
 
         if (intent.getAction().equals(Constants.ACTION.STARTFOREGROUND_ACTION)) {
             showNotification();
@@ -59,8 +69,10 @@ public class NotificationService extends Service {
             stopForeground(true);
             stopSelf();
         }
-//        return START_STICKY;
-         return super.onStartCommand(intent, flags, startId);
+        MusifyPlayer.initMediaRemote2();
+        return START_STICKY;
+//         return super.onStartCommand(intent, flags, startId);
+//         return START_REDELIVER_INTENT;
     }
 
 
@@ -153,6 +165,7 @@ public class NotificationService extends Service {
                         .setContentText("Content Text")
                         .setContent(views)
                         .setCustomBigContentView(bigViews)
+                        .setContentIntent(pendingIntent)
                         .setPriority( NotificationCompat.PRIORITY_DEFAULT);
 
         status  = mBuilder.build();

@@ -36,10 +36,11 @@
         <activity
             android:name=".PlayerActivity"
             android:theme="@style/FullScreen" />
-
-        <activity android:name=".TrackQueueActivity"
+        <activity
+            android:name=".TrackQueueActivity"
             android:theme="@style/FullScreen" />
-        <service android:name="france.apps.musify.utils.NotificationService" />
+
+        <service android:name=".utils.NotificationService" />
     </application>
 
 </manifest>
