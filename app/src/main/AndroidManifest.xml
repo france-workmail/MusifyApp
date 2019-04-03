@@ -3,6 +3,8 @@
     package="france.apps.musify">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+
 
     <application
         android:name=".MusifyApplication"
@@ -34,9 +36,11 @@
         <activity
             android:name=".PlayerActivity"
             android:theme="@style/FullScreen" />
-
-        <activity android:name=".TrackQueueActivity"
+        <activity
+            android:name=".TrackQueueActivity"
             android:theme="@style/FullScreen" />
+
+        <service android:name=".utils.NotificationService" />
     </application>
 
 </manifest>

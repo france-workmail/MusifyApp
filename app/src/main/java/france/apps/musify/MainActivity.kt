@@ -17,7 +17,9 @@ import france.apps.musify.menufragments.HomeFragment
 import android.util.Log
 import com.google.firebase.database.*
 import france.apps.musify.menufragments.BrowseFragment
+import france.apps.musify.utils.Constants
 import france.apps.musify.utils.MusifyPlayer
+import france.apps.musify.utils.NotificationService
 import france.apps.musify.utils.models.PlayableMedia
 
 
@@ -117,6 +119,8 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -225,9 +229,17 @@ class MainActivity : AppCompatActivity() {
 
 
     override  fun onDestroy() {
+
+        if(MusifyPlayer.isPlaying()){
+            var serviceIntent = Intent(this@MainActivity, NotificationService::class.java)
+            serviceIntent.action = Constants.ACTION.STARTFOREGROUND_ACTION
+            startService(serviceIntent)
+
+        }
+
         super.onDestroy()
-        MusifyPlayer.destroy()
     }
+
 
     internal inner class ViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 

@@ -93,6 +93,7 @@ public class HeadsetButtonReceiver extends BroadcastReceiver {
 //
 //        }
 //    }
+
     /**
      *
      * New Implementation
@@ -111,9 +112,6 @@ public class HeadsetButtonReceiver extends BroadcastReceiver {
 
 
                 switch (keyCode) {
-
-
-
                     case KeyEvent.KEYCODE_MEDIA_NEXT:
                         Log.e(TAG,"NEXT");
                         MusifyPlayer.playNext();
